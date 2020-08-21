@@ -1,18 +1,18 @@
 # Requirements
 This code has been developed with
   - python 3.6
-  - tensorflow 1.12.0
-  - numpy 1.17.2
-  - snorkel 0.9.1
-  - tensorflow_hub 0.7.0
+  - tensorflow 1.14.0
+  - numpy 1.17.4
+  - torch 1.1.0
 
 # Data Description
 The Data/ directory contains dataset for the following 3 datasets:
   * MITR - Slot filling task (Source: https://groups.csail.mit.edu/sls/downloads/restaurant/)
   * YOUTUBE - Spam Classification task of youtube comments (Source: http://www.dt.fee.unicamp.br/~tiago//youtubespamcollection)
   * SMS - Spam classification task of text messages (Source: https://archive.ics.uci.edu/ml/datasets/SMS+Spam+Collection)
+  * CENSUS 
   
-## data/TREC (or any other data dir) consists following four pickle files
+## data/SMS (or any other data dir) consists following four pickle files
   * d_processed.p (d set: labeled data ) 
   * U_processed.p (U set: unlabeled data)
   * test_processed.p (test data)
@@ -46,3 +46,7 @@ The Data/ directory contains dataset for the following 3 datasets:
     - r is a 0 matrix in all the pickles except d_processed.p
     - Note that this is different from rule coverage mask "m"
     - This matrix defines the coupled rule,example pairs.
+
+# Usage
+  ** Run respective .sh files to train the model
+  ** To run semi-supervised model of youtube - run *tr_youtube.sh*
