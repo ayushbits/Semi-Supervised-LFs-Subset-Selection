@@ -48,5 +48,5 @@ The Data/ directory contains dataset for the following 3 datasets:
     - This matrix defines the coupled rule,example pairs.
 
 # Usage
-  ** Run respective .sh files to train the model
-  ** To run semi-supervised model of youtube - run *tr_youtube.sh*
+  - Run respective .sh files to train the model
+  - To run semi-supervised model of youtube - run *tr_youtube.sh*
