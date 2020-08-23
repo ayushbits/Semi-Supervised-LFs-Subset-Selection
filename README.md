@@ -1,7 +1,6 @@
 # Requirements
 This code has been developed with
   - python 3.6
-  - tensorflow 1.14.0
   - numpy 1.17.4
   - torch 1.1.0
 
