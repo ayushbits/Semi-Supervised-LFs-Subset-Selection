@@ -2,6 +2,8 @@ __pycache__/*
 .idea/*
 models/*
 *_exp*/*
+data/*
+Data/*
 yt_entropy_unsup/*
 mitr_unsup/*
 exps/*
