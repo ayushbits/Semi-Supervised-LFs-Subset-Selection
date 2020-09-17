@@ -49,3 +49,4 @@ The Data/ directory contains dataset for the following 3 datasets:
 # Usage
   - Run respective .sh files to train the model
   - To run semi-supervised model of youtube - run *tr_youtube.sh*
+  - Each *sh* file contains calls to various combinations of loss functions.
