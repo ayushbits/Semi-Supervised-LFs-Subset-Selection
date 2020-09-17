@@ -18,9 +18,10 @@ torch.set_default_dtype(torch.float64)
 torch.set_printoptions(threshold=20)
 
 objs = []
-n_classes = 2
-n_lfs = 6
-with open('Data/rec/d_processed.p', 'rb') as f:
+n_classes =2
+n_lfs = 52
+dset_directory = sys.argv[10]
+with open(dset_directory + '/d_processed.p', 'rb') as f:
     while 1:
         try:
             o = pickle.load(f)
@@ -34,7 +35,7 @@ l_supervised = torch.tensor(objs[2]).long()
 s_supervised = torch.tensor(objs[2]).double()
 
 objs = []
-with open('Data/rec/U_processed.p', 'rb') as f:
+with open(dset_directory + '/U_processed.p', 'rb') as f:
     while 1:
         try:
             o = pickle.load(f)
@@ -57,7 +58,7 @@ s_unsupervised = torch.tensor(np.delete(objs[2],excl, axis=0)).double()
 print('Length of U is', len(x_unsupervised))
 
 objs = []
-with open('Data/rec/validation_processed.p', 'rb') as f:
+with open(dset_directory + '/validation_processed.p', 'rb') as f:
     while 1:
         try:
             o = pickle.load(f)
@@ -71,7 +72,7 @@ l_valid = torch.tensor(objs[2]).long()
 s_valid = torch.tensor(objs[2])
 
 objs1 = []
-with open('Data/rec/test_processed.p', 'rb') as f:
+with open(dset_directory + '/test_processed.p', 'rb') as f:
     while 1:
         try:
             o = pickle.load(f)
@@ -87,7 +88,9 @@ s_test = torch.tensor(objs1[2]).double()
 n_features = x_supervised.shape[1]
 
 # Labeling Function Classes
-k = torch.from_numpy(np.array([0, 1, 1, 1, 1, 0])).long()
+# k = torch.from_numpy(np.array([0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0])).long()
+#lf_classes_file = sys.argv[11]
+k = torch.from_numpy(np.load(dset_directory + '/k.npy'))
 
 
 continuous_mask = torch.zeros(n_lfs).double()
@@ -134,16 +137,16 @@ supervised_mask = torch.cat([torch.ones(l_supervised.shape[0]), torch.zeros(l_un
 
 # a = torch.ones(n_lfs).double() * 0.9
 # print('before ',a)
-prec_lfs=[]
-for i in range(n_lfs):
-    correct = 0
-    for j in range(len(y_valid)):
-        if y_valid[j] == l_valid[j][i]:
-            correct+=1
-    prec_lfs.append(correct/len(y_valid))
+#prec_lfs=[]
+#for i in range(n_lfs):
+#    correct = 0
+#    for j in range(len(y_valid)):
+#        if y_valid[j] == l_valid[j][i]:
+#            correct+=1
+#    prec_lfs.append(correct/len(y_valid))
 
 ## End Quality Quides##
-a =  torch.tensor(prec_lfs)
+a =  torch.tensor(k)
 # print('after ',a)
 
 #Setting |validation|=|supevised|
@@ -169,7 +172,7 @@ for lo in range(0,num_runs):
 
     lr_model = LogisticRegression(n_features, n_classes)
 
-    optimizer = torch.optim.Adam([{"params": lr_model.parameters()}, {"params": [pi, pi_y, theta]}], lr=0.001)
+    optimizer = torch.optim.Adam([{"params": lr_model.parameters()}, {"params": [pi, pi_y, theta]}], lr=0.003)
     optimizer_lr = torch.optim.Adam(lr_model.parameters(), lr=0.0003)
     optimizer_gm = torch.optim.Adam([theta, pi, pi_y], lr=0.01, weight_decay=0)
     # optimizer = torch.optim.Adam([theta, pi, pi_y], lr=0.01, weight_decay=0)
@@ -179,7 +182,7 @@ for lo in range(0,num_runs):
 
     dataset = TensorDataset(x_train, y_train, l, s, supervised_mask)
 
-    loader = DataLoader(dataset, batch_size=256, shuffle=True,pin_memory=True)
+    loader = DataLoader(dataset, batch_size=32, shuffle=True,pin_memory=True)
     save_folder = sys.argv[1]
     print('num runs are ', sys.argv[1], num_runs)
     best_score_lr,best_score_gm,best_epoch_lr,best_epoch_gm,best_score_lr_val, best_score_gm_val = 0,0,0,0,0,0
@@ -274,27 +277,29 @@ for lo in range(0,num_runs):
                 optimizer_gm.step()
                 optimizer_lr.step()
 
+        #print(lr_model.state_dict())
+        #print(theta,pi)
         #Test
         y_pred = np.argmax(probability(theta, pi_y, pi, l_test, s_test, k, n_classes, continuous_mask).detach().numpy(), 1)
-        gm_acc = accuracy_score(y_test, y_pred)
+        gm_acc = f1_score(y_test, y_pred)
         #Valid
         y_pred = np.argmax(probability(theta, pi_y, pi, l_valid, s_valid, k, n_classes, continuous_mask).detach().numpy(), 1)
-        gm_valid_acc = accuracy_score(y_valid, y_pred)
+        gm_valid_acc = f1_score(y_valid, y_pred)
 
         #LR Test
 
         probs = torch.nn.Softmax()(lr_model(x_test))
         y_pred = np.argmax(probs.detach().numpy(), 1)
-        lr_acc = accuracy_score(y_test, y_pred)
+        lr_acc =f1_score(y_test, y_pred)
         #LR Valid
         probs = torch.nn.Softmax()(lr_model(x_valid))
         y_pred = np.argmax(probs.detach().numpy(), 1)
-        lr_valid_acc = accuracy_score(y_valid, y_pred)
+        lr_valid_acc = f1_score(y_valid, y_pred)
 
-        # print("Epoch: {}\t Test GM accuracy_score: {}".format(epoch, gm_acc ))
-        # print("Epoch: {}\tGM accuracy_score(Valid): {}".format(epoch, gm_valid_acc))
-        # print("Epoch: {}\tTest LR accuracy_score: {}".format(epoch, lr_acc ))    
-        # print("Epoch: {}\tLR accuracy_score(Valid): {}".format(epoch, lr_valid_acc))
+        #print("Epoch: {}\t Test GM accuracy_score: {}".format(epoch, gm_acc ))
+        #print("Epoch: {}\tGM accuracy_score(Valid): {}".format(epoch, gm_valid_acc))
+        #print("Epoch: {}\tTest LR accuracy_score: {}".format(epoch, lr_acc ))    
+        #print("Epoch: {}\tLR accuracy_score(Valid): {}".format(epoch, lr_valid_acc))
         
 
         if gm_valid_acc > best_score_gm_val and gm_valid_acc > best_score_lr_val:
@@ -330,7 +335,7 @@ for lo in range(0,num_runs):
             stop_pahle_gm = []
 
 
-        if len(stop_pahle) >7 and len(stop_pahle_gm) >7 and (all(best_score_lr_val >= k for k in stop_pahle) or \
+        if len(stop_pahle) >100 and len(stop_pahle_gm) >100 and (all(best_score_lr_val >= k for k in stop_pahle) or \
         all(best_score_gm_val >= k for k in stop_pahle_gm)):
             print('Early Stopping at', best_epoch_gm, best_score_gm, best_score_lr)
             print('Validation score Early Stopping at', best_epoch_gm, best_score_lr_val, best_score_gm_val)

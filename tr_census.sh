@@ -1,3 +1,4 @@
+# Arguments - directory name l1 se l7 number of runs(9) dataset_name(10) lf_classes(11, k.npy)
 #L1
 exp_name='census_exp1/l1'
 mkdir -p $exp_name

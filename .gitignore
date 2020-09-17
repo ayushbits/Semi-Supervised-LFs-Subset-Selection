@@ -4,6 +4,12 @@ models/*
 *_exp*/*
 data/*
 Data/*
+datasets/*
 yt_entropy_unsup/*
 mitr_unsup/*
 exps/*
+*_unsup/*
+*_sup/*
+iono/*
+audit/*
+*_rand/*
