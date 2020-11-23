@@ -1,0 +1,129 @@
+Length of U is 98
+num runs are  iono_noise/sub_select 5
+num runs are  iono_noise/sub_select 5
+Run 	 0 Epoch, GM, LR 	 94 0.7088607594936709 0.732919254658385
+Run 	 0 GM Val, LR Val 	 99 0.7297297297297297 0.8169014084507041
+num runs are  iono_noise/sub_select 5
+Run 	 1 Epoch, GM, LR 	 83 0.7088607594936709 0.7407407407407407
+Run 	 1 GM Val, LR Val 	 99 0.736842105263158 0.8219178082191781
+num runs are  iono_noise/sub_select 5
+Run 	 2 Epoch, GM, LR 	 73 0.7169811320754718 0.7407407407407407
+Run 	 2 GM Val, LR Val 	 99 0.736842105263158 0.8333333333333334
+num runs are  iono_noise/sub_select 5
+Run 	 3 Epoch, GM, LR 	 70 0.7169811320754718 0.7407407407407407
+Run 	 3 GM Val, LR Val 	 99 0.736842105263158 0.8108108108108109
+num runs are  iono_noise/sub_select 5
+Run 	 4 Epoch, GM, LR 	 82 0.7088607594936709 0.7407407407407407
+Run 	 4 GM Val, LR Val 	 99 0.736842105263158 0.8219178082191781
+===============For noise  0.2 =================
+Averaged scores are for GM,LR 0.7121089085263913 0.7391764435242696
+VALIDATION Averaged scores are for GM,LR 0.7354196301564724 0.820976233806641
+num runs are  iono_noise/sub_select 5
+num runs are  iono_noise/sub_select 5
+Run 	 0 Epoch, GM, LR 	 73 0.7088607594936709 0.732919254658385
+Run 	 0 GM Val, LR Val 	 99 0.7567567567567567 0.8169014084507041
+num runs are  iono_noise/sub_select 5
+Run 	 1 Epoch, GM, LR 	 49 0.7169811320754718 0.736196319018405
+Run 	 1 GM Val, LR Val 	 99 0.7567567567567567 0.8169014084507041
+num runs are  iono_noise/sub_select 5
+Run 	 2 Epoch, GM, LR 	 46 0.7169811320754718 0.736196319018405
+Run 	 2 GM Val, LR Val 	 99 0.7567567567567567 0.8285714285714285
+num runs are  iono_noise/sub_select 5
+Run 	 3 Epoch, GM, LR 	 59 0.7088607594936709 0.732919254658385
+Run 	 3 GM Val, LR Val 	 99 0.7567567567567567 0.8169014084507041
+num runs are  iono_noise/sub_select 5
+Run 	 4 Epoch, GM, LR 	 96 0.7006369426751593 0.725
+Run 	 4 GM Val, LR Val 	 99 0.7397260273972601 0.8169014084507041
+===============For noise  0.3 =================
+Averaged scores are for GM,LR 0.710464145162689 0.732646229470716
+VALIDATION Averaged scores are for GM,LR 0.7533506108848573 0.8192354124748491
+num runs are  iono_noise/sub_select 5
+num runs are  iono_noise/sub_select 5
+Run 	 0 Epoch, GM, LR 	 50 0.7204968944099378 0.736196319018405
+Run 	 0 GM Val, LR Val 	 99 0.7200000000000001 0.8333333333333334
+num runs are  iono_noise/sub_select 5
+Run 	 1 Epoch, GM, LR 	 42 0.7204968944099378 0.736196319018405
+Run 	 1 GM Val, LR Val 	 99 0.736842105263158 0.8108108108108109
+num runs are  iono_noise/sub_select 5
+Run 	 2 Epoch, GM, LR 	 32 0.7283950617283951 0.7407407407407407
+Run 	 2 GM Val, LR Val 	 99 0.736842105263158 0.8108108108108109
+num runs are  iono_noise/sub_select 5
+Run 	 3 Epoch, GM, LR 	 92 0.6923076923076924 0.7283950617283951
+Run 	 3 GM Val, LR Val 	 99 0.7027027027027027 0.7837837837837838
+num runs are  iono_noise/sub_select 5
+Run 	 4 Epoch, GM, LR 	 20 0.7283950617283951 0.7407407407407407
+Run 	 4 GM Val, LR Val 	 99 0.7532467532467533 0.8169014084507041
+===============For noise  0.4 =================
+Averaged scores are for GM,LR 0.7180183209168717 0.7364538362493374
+VALIDATION Averaged scores are for GM,LR 0.7299267332951545 0.8111280294378886
+num runs are  iono_noise/sub_select 5
+num runs are  iono_noise/sub_select 5
+Run 	 0 Epoch, GM, LR 	 40 0.6838709677419356 0.7407407407407407
+Run 	 0 GM Val, LR Val 	 99 0.7200000000000001 0.8571428571428571
+num runs are  iono_noise/sub_select 5
+Run 	 1 Epoch, GM, LR 	 43 0.6838709677419356 0.732919254658385
+Run 	 1 GM Val, LR Val 	 99 0.7200000000000001 0.8285714285714285
+num runs are  iono_noise/sub_select 5
+Run 	 2 Epoch, GM, LR 	 44 0.6838709677419356 0.725
+Run 	 2 GM Val, LR Val 	 99 0.7200000000000001 0.835820895522388
+num runs are  iono_noise/sub_select 5
+Run 	 3 Epoch, GM, LR 	 43 0.6838709677419356 0.732919254658385
+Run 	 3 GM Val, LR Val 	 99 0.7200000000000001 0.8055555555555555
+num runs are  iono_noise/sub_select 5
+Run 	 4 Epoch, GM, LR 	 39 0.6923076923076924 0.7407407407407407
+Run 	 4 GM Val, LR Val 	 99 0.7200000000000001 0.8571428571428571
+===============For noise  0.5 =================
+Averaged scores are for GM,LR 0.6855583126550869 0.7344639981596502
+VALIDATION Averaged scores are for GM,LR 0.7200000000000001 0.8368467187870172
+num runs are  iono_noise/sub_select 5
+num runs are  iono_noise/sub_select 5
+Run 	 0 Epoch, GM, LR 	 6 0.7455621301775149 0.9543147208121827
+Run 	 0 GM Val, LR Val 	 99 0.5882352941176471 0.7551020408163265
+num runs are  iono_noise/sub_select 5
+Run 	 1 Epoch, GM, LR 	 98 0.732919254658385 0.7484662576687116
+Run 	 1 GM Val, LR Val 	 99 0.6666666666666667 0.7567567567567567
+num runs are  iono_noise/sub_select 5
+Length of U is 98
+num runs are  iono_noise/sub_select 5
+num runs are  iono_noise/sub_select 5
+Run 	 0 Epoch, GM, LR 	 24 0.7088607594936709 0.736196319018405
+Run 	 0 GM Val, LR Val 	 99 0.736842105263158 0.8333333333333334
+num runs are  iono_noise/sub_select 5
+Run 	 1 Epoch, GM, LR 	 50 0.7088607594936709 0.7407407407407407
+Run 	 1 GM Val, LR Val 	 99 0.736842105263158 0.7945205479452055
+num runs are  iono_noise/sub_select 5
+Run 	 2 Epoch, GM, LR 	 21 0.7006369426751593 0.736196319018405
+Run 	 2 GM Val, LR Val 	 99 0.736842105263158 0.8285714285714285
+num runs are  iono_noise/sub_select 5
+Run 	 3 Epoch, GM, LR 	 90 0.7088607594936709 0.725
+Run 	 3 GM Val, LR Val 	 99 0.736842105263158 0.8285714285714285
+num runs are  iono_noise/sub_select 5
+Run 	 4 Epoch, GM, LR 	 85 0.7088607594936709 0.7407407407407407
+Run 	 4 GM Val, LR Val 	 99 0.736842105263158 0.8108108108108109
+===============For noise  0.6 =================
+Averaged scores are for GM,LR 0.7072159961299687 0.7357748239036583
+VALIDATION Averaged scores are for GM,LR 0.736842105263158 0.8191615098464412
+num runs are  iono_noise/sub_select 5
+num runs are  iono_noise/sub_select 5
+Run 	 0 Epoch, GM, LR 	 3 0.8681318681318682 0.945273631840796
+Run 	 0 GM Val, LR Val 	 99 0.8148148148148148 0.6808510638297872
+num runs are  iono_noise/sub_select 5
+Run 	 1 Epoch, GM, LR 	 41 0.7882352941176471 0.8208092485549133
+Run 	 1 GM Val, LR Val 	 99 0.7466666666666667 0.9041095890410958
+num runs are  iono_noise/sub_select 5
+Run 	 2 Epoch, GM, LR 	 39 0.7810650887573964 0.7953216374269007
+Run 	 2 GM Val, LR Val 	 99 0.7466666666666667 0.8266666666666665
+num runs are  iono_noise/sub_select 5
+Run 	 3 Epoch, GM, LR 	 38 0.7953216374269007 0.8070175438596492
+Run 	 3 GM Val, LR Val 	 99 0.736842105263158 0.8732394366197184
+num runs are  iono_noise/sub_select 5
+Run 	 4 Epoch, GM, LR 	 6 0.8681318681318682 0.8586956521739132
+Run 	 4 GM Val, LR Val 	 99 0.8148148148148148 0.6530612244897959
+===============For noise  0.7 =================
+Averaged scores are for GM,LR 0.8201771513131361 0.8454235427712344
+VALIDATION Averaged scores are for GM,LR 0.7719610136452242 0.7875855961294127
+num runs are  iono_noise/sub_select 5
+num runs are  iono_noise/sub_select 5
+Run 	 0 Epoch, GM, LR 	 84 0.7088607594936709 0.7407407407407407
+Run 	 0 GM Val, LR Val 	 99 0.6578947368421052 0.7792207792207791
+num runs are  iono_noise/sub_select 5

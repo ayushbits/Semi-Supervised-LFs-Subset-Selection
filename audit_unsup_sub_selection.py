@@ -25,8 +25,8 @@ torch.set_default_dtype(torch.float64)
 torch.set_printoptions(threshold=20)
 
 objs = []
-n_classes =2
-n_lfs = 52
+n_classes = int(sys.argv[11])
+#n_lfs = 52
 dset_directory = sys.argv[10]
 with open(dset_directory + '/d_processed.p', 'rb') as f:
     while 1:
@@ -57,6 +57,7 @@ for x in objs[1]:
         excl.append(idx)
     idx+=1
 
+print('Length of U before is', len(objs[0]))
 x_unsupervised = torch.tensor(np.delete(objs[0],excl, axis=0)).double()
 y_unsupervised = torch.tensor(np.delete(objs[3],excl, axis=0)).long()
 l_unsupervised = torch.tensor(np.delete(objs[2],excl, axis=0)).long()
@@ -76,7 +77,7 @@ with open(dset_directory + '/validation_processed.p', 'rb') as f:
 x_valid = torch.tensor(objs[0]).double()
 y_valid = objs[3]
 l_valid = torch.tensor(objs[2]).long()
-s_valid = torch.tensor(objs[2])
+s_valid = torch.tensor(objs[2]).double()
 
 objs1 = []
 with open(dset_directory + '/test_processed.p', 'rb') as f:
@@ -98,7 +99,20 @@ n_features = x_supervised.shape[1]
 # k = torch.from_numpy(np.array([0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0])).long()
 #lf_classes_file = sys.argv[11]
 k = torch.from_numpy(np.load(dset_directory + '/k.npy'))
-a =  torch.tensor(np.load(dset_directory + '/precision_values.npy'))
+n_lfs = int(len(k))
+
+a = torch.ones(n_lfs).double() * 0.9
+print('before ',a)
+prec_lfs=[]
+for i in range(n_lfs):
+   correct = 0
+   for j in range(len(y_valid)):
+       if y_valid[j] == l_valid[j][i]:
+           correct+=1
+   prec_lfs.append(correct/len(y_valid))
+a = torch.tensor(prec_lfs) 
+
+#a =  torch.tensor(np.load(dset_directory + '/precision_values.npy'))
 continuous_mask = torch.zeros(n_lfs).double()
 
 for i in range(s_supervised.shape[0]):
@@ -244,7 +258,7 @@ for lo in range(0, num_runs):
             else:
                 prec_loss = 0
             loss = loss_1 + loss_2 + loss_3 + loss_4 + loss_6 + loss_5 + prec_loss
-            # print('loss is',loss)
+           # print('loss is',loss)
             if loss != 0:
                 loss.backward()
                 optimizer_gm.step()

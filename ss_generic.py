@@ -18,8 +18,8 @@ torch.set_default_dtype(torch.float64)
 torch.set_printoptions(threshold=20)
 
 objs = []
-n_classes =2
-n_lfs = 64
+n_classes = int(sys.argv[11])
+# n_lfs = 25
 dset_directory = sys.argv[10]
 with open(dset_directory + '/d_processed.p', 'rb') as f:
     while 1:
@@ -49,6 +49,7 @@ for x in objs[1]:
     if(all(x==int(n_classes))):
         excl.append(idx)
     idx+=1
+print('no of excludings are ', len(excl))
 
 x_unsupervised = torch.tensor(np.delete(objs[0],excl, axis=0)).double()
 y_unsupervised = torch.tensor(np.delete(objs[3],excl, axis=0)).long()
@@ -69,7 +70,7 @@ with open(dset_directory + '/validation_processed.p', 'rb') as f:
 x_valid = torch.tensor(objs[0]).double()
 y_valid = objs[3]
 l_valid = torch.tensor(objs[2]).long()
-s_valid = torch.tensor(objs[2])
+s_valid = torch.tensor(objs[2]).double()
 
 objs1 = []
 with open(dset_directory + '/test_processed.p', 'rb') as f:
@@ -91,7 +92,8 @@ n_features = x_supervised.shape[1]
 # k = torch.from_numpy(np.array([0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0])).long()
 #lf_classes_file = sys.argv[11]
 k = torch.from_numpy(np.load(dset_directory + '/k.npy'))
-
+n_lfs = int(len(k))
+print('number of lfs ', n_lfs)
 
 continuous_mask = torch.zeros(n_lfs).double()
 
@@ -135,18 +137,18 @@ supervised_mask = torch.cat([torch.ones(l_supervised.shape[0]), torch.zeros(l_un
 
 ## Quality Guides ##
 
-# a = torch.ones(n_lfs).double() * 0.9
-# print('before ',a)
-#prec_lfs=[]
-#for i in range(n_lfs):
-#    correct = 0
-#    for j in range(len(y_valid)):
-#        if y_valid[j] == l_valid[j][i]:
-#            correct+=1
-#    prec_lfs.append(correct/len(y_valid))
-
+a = torch.ones(n_lfs).double() * 0.9
+print('before ',a)
+prec_lfs=[]
+for i in range(n_lfs):
+   correct = 0
+   for j in range(len(y_valid)):
+       if y_valid[j] == l_valid[j][i]:
+           correct+=1
+   prec_lfs.append(correct/len(y_valid))
+a = torch.tensor(prec_lfs) 
 ## End Quality Quides##
-a =  torch.tensor(np.load(dset_directory + '/precision_values.npy'))
+# a =  torch.tensor(np.load(dset_directory + '/precision_values.npy'))
 # print('after ',a)
 
 #Setting |validation|=|supevised|
@@ -155,13 +157,14 @@ y_valid = y_valid[0:len(x_supervised)]
 s_valid = s_valid[0:len(x_supervised)]
 l_valid = l_valid[0:len(x_supervised)]
 
-
+print(l_valid.shape)
+print(l_valid[0])
 
 num_runs = int(sys.argv[9])
 
 final_score_gm, final_score_lr, final_score_gm_val, final_score_lr_val = [],[],[],[]
 for lo in range(0,num_runs):
-    pi = torch.ones((n_classes, n_lfs)).double()
+    pi = torch.ones(n_classes, n_lfs).double()
     pi.requires_grad = True
 
     theta = torch.ones((n_classes, n_lfs)).double() * 1
@@ -228,6 +231,8 @@ for lo in range(0,num_runs):
                     loss_1 = supervised_criterion(lr_model(sample[0][supervised_indices]), sample[1][supervised_indices])
                 else:
                     loss_1 = 0
+            else:
+                loss_1=0
 
             if(sys.argv[3] =='l2'):
                 unsupervised_lr_probability = torch.nn.Softmax()(lr_model(sample[0][unsupervised_indices]))
@@ -262,6 +267,7 @@ for lo in range(0,num_runs):
                 probs_graphical = (probs_graphical.t() / probs_graphical.sum(1)).t()
                 probs_lr = torch.nn.Softmax()(lr_model(sample[0]))
                 loss_6 = kl_divergence(probs_graphical, probs_lr)
+
             else:
                 loss_6= 0
             # loss_6 = - torch.log(1 - probs_graphical * (1 - probs_lr)).sum(1).mean()
@@ -285,6 +291,7 @@ for lo in range(0,num_runs):
         #Valid
         y_pred = np.argmax(probability(theta, pi_y, pi, l_valid, s_valid, k, n_classes, continuous_mask).detach().numpy(), 1)
         gm_valid_acc = f1_score(y_valid, y_pred)
+        # print(y_valid, y_pred)
 
         #LR Test
 
@@ -296,10 +303,10 @@ for lo in range(0,num_runs):
         y_pred = np.argmax(probs.detach().numpy(), 1)
         lr_valid_acc = f1_score(y_valid, y_pred)
 
-        #print("Epoch: {}\t Test GM accuracy_score: {}".format(epoch, gm_acc ))
-        #print("Epoch: {}\tGM accuracy_score(Valid): {}".format(epoch, gm_valid_acc))
-        #print("Epoch: {}\tTest LR accuracy_score: {}".format(epoch, lr_acc ))    
-        #print("Epoch: {}\tLR accuracy_score(Valid): {}".format(epoch, lr_valid_acc))
+        # print("Epoch: {}\t Test GM accuracy_score: {}".format(epoch, gm_acc ))
+        # print("Epoch: {}\tGM accuracy_score(Valid): {}".format(epoch, gm_valid_acc))
+        # print("Epoch: {}\tTest LR accuracy_score: {}".format(epoch, lr_acc ))    
+        # print("Epoch: {}\tLR accuracy_score(Valid): {}".format(epoch, lr_valid_acc))
         
 
         if gm_valid_acc > best_score_gm_val and gm_valid_acc > best_score_lr_val:
