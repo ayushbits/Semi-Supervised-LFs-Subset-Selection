@@ -4,7 +4,14 @@ models/*
 *_exp*/*
 data/*
 Data/*
-datasets/*
+datasets/audit.zip
+datasets/audit_lr
+datasets/grid
+datasets/iris
+datasets/ionosphere
+datasets/breast_cancer
+datasets/glass_identification
+datasets/audit
 yt_entropy_unsup/*
 mitr_unsup/*
 exps/*
