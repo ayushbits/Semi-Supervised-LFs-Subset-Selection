@@ -1,0 +1,580 @@
+Length of U is 4723
+num runs are  trec_sup/l12346 5
+Epoch: 0	 Test GM accuracy_score: 0.476
+Epoch: 0	GM accuracy_score(Valid): 0.5294117647058824
+Epoch: 0	Test LR accuracy_score: 0.276
+Epoch: 0	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 1	 Test GM accuracy_score: 0.456
+Epoch: 1	GM accuracy_score(Valid): 0.5
+Epoch: 1	Test LR accuracy_score: 0.276
+Epoch: 1	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 2	 Test GM accuracy_score: 0.4
+Epoch: 2	GM accuracy_score(Valid): 0.39705882352941174
+Epoch: 2	Test LR accuracy_score: 0.276
+Epoch: 2	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 3	 Test GM accuracy_score: 0.428
+Epoch: 3	GM accuracy_score(Valid): 0.4117647058823529
+Epoch: 3	Test LR accuracy_score: 0.296
+Epoch: 3	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 4	 Test GM accuracy_score: 0.424
+Epoch: 4	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 4	Test LR accuracy_score: 0.294
+Epoch: 4	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 5	 Test GM accuracy_score: 0.428
+Epoch: 5	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 5	Test LR accuracy_score: 0.328
+Epoch: 5	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 6	 Test GM accuracy_score: 0.416
+Epoch: 6	GM accuracy_score(Valid): 0.35294117647058826
+Epoch: 6	Test LR accuracy_score: 0.342
+Epoch: 6	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 7	 Test GM accuracy_score: 0.426
+Epoch: 7	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 7	Test LR accuracy_score: 0.33
+Epoch: 7	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 8	 Test GM accuracy_score: 0.416
+Epoch: 8	GM accuracy_score(Valid): 0.35294117647058826
+Epoch: 8	Test LR accuracy_score: 0.34
+Epoch: 8	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 9	 Test GM accuracy_score: 0.426
+Epoch: 9	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 9	Test LR accuracy_score: 0.366
+Epoch: 9	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 10	 Test GM accuracy_score: 0.426
+Epoch: 10	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 10	Test LR accuracy_score: 0.358
+Epoch: 10	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 11	 Test GM accuracy_score: 0.372
+Epoch: 11	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 11	Test LR accuracy_score: 0.306
+Epoch: 11	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 12	 Test GM accuracy_score: 0.37
+Epoch: 12	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 12	Test LR accuracy_score: 0.326
+Epoch: 12	LR accuracy_score(Valid): 0.3235294117647059
+Epoch: 13	 Test GM accuracy_score: 0.35
+Epoch: 13	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 13	Test LR accuracy_score: 0.322
+Epoch: 13	LR accuracy_score(Valid): 0.29411764705882354
+Epoch: 14	 Test GM accuracy_score: 0.35
+Epoch: 14	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 14	Test LR accuracy_score: 0.316
+Epoch: 14	LR accuracy_score(Valid): 0.3088235294117647
+Epoch: 15	 Test GM accuracy_score: 0.336
+Epoch: 15	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 15	Test LR accuracy_score: 0.318
+Epoch: 15	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 16	 Test GM accuracy_score: 0.336
+Epoch: 16	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 16	Test LR accuracy_score: 0.314
+Epoch: 16	LR accuracy_score(Valid): 0.27941176470588236
+Epoch: 17	 Test GM accuracy_score: 0.336
+Epoch: 17	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 17	Test LR accuracy_score: 0.324
+Epoch: 17	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 18	 Test GM accuracy_score: 0.336
+Epoch: 18	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 18	Test LR accuracy_score: 0.334
+Epoch: 18	LR accuracy_score(Valid): 0.27941176470588236
+Epoch: 19	 Test GM accuracy_score: 0.336
+Epoch: 19	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 19	Test LR accuracy_score: 0.33
+Epoch: 19	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 20	 Test GM accuracy_score: 0.336
+Epoch: 20	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 20	Test LR accuracy_score: 0.328
+Epoch: 20	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 21	 Test GM accuracy_score: 0.336
+Epoch: 21	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 21	Test LR accuracy_score: 0.324
+Epoch: 21	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 22	 Test GM accuracy_score: 0.338
+Epoch: 22	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 22	Test LR accuracy_score: 0.306
+Epoch: 22	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 23	 Test GM accuracy_score: 0.338
+Epoch: 23	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 23	Test LR accuracy_score: 0.316
+Epoch: 23	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 24	 Test GM accuracy_score: 0.338
+Epoch: 24	GM accuracy_score(Valid): 0.29411764705882354
+Epoch: 24	Test LR accuracy_score: 0.32
+Epoch: 24	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 25	 Test GM accuracy_score: 0.338
+Epoch: 25	GM accuracy_score(Valid): 0.29411764705882354
+Epoch: 25	Test LR accuracy_score: 0.31
+Epoch: 25	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 26	 Test GM accuracy_score: 0.338
+Epoch: 26	GM accuracy_score(Valid): 0.29411764705882354
+Epoch: 26	Test LR accuracy_score: 0.308
+Epoch: 26	LR accuracy_score(Valid): 0.2647058823529412
+Early Stopping at 0 0.476 0.276
+Validation score Early Stopping at 0 0.2647058823529412 0.5294117647058824
+Run 	 0 Epoch, GM, LR 	 0 0.476 0.276
+Run 	 0 GM Val, LR Val 	 26 0.5294117647058824 0.2647058823529412
+num runs are  trec_sup/l12346 5
+Epoch: 0	 Test GM accuracy_score: 0.478
+Epoch: 0	GM accuracy_score(Valid): 0.5588235294117647
+Epoch: 0	Test LR accuracy_score: 0.276
+Epoch: 0	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 1	 Test GM accuracy_score: 0.438
+Epoch: 1	GM accuracy_score(Valid): 0.4411764705882353
+Epoch: 1	Test LR accuracy_score: 0.276
+Epoch: 1	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 2	 Test GM accuracy_score: 0.412
+Epoch: 2	GM accuracy_score(Valid): 0.4264705882352941
+Epoch: 2	Test LR accuracy_score: 0.276
+Epoch: 2	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 3	 Test GM accuracy_score: 0.398
+Epoch: 3	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 3	Test LR accuracy_score: 0.276
+Epoch: 3	LR accuracy_score(Valid): 0.29411764705882354
+Epoch: 4	 Test GM accuracy_score: 0.428
+Epoch: 4	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 4	Test LR accuracy_score: 0.292
+Epoch: 4	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 5	 Test GM accuracy_score: 0.428
+Epoch: 5	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 5	Test LR accuracy_score: 0.298
+Epoch: 5	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 6	 Test GM accuracy_score: 0.43
+Epoch: 6	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 6	Test LR accuracy_score: 0.31
+Epoch: 6	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 7	 Test GM accuracy_score: 0.428
+Epoch: 7	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 7	Test LR accuracy_score: 0.322
+Epoch: 7	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 8	 Test GM accuracy_score: 0.43
+Epoch: 8	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 8	Test LR accuracy_score: 0.326
+Epoch: 8	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 9	 Test GM accuracy_score: 0.424
+Epoch: 9	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 9	Test LR accuracy_score: 0.352
+Epoch: 9	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 10	 Test GM accuracy_score: 0.424
+Epoch: 10	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 10	Test LR accuracy_score: 0.328
+Epoch: 10	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 11	 Test GM accuracy_score: 0.414
+Epoch: 11	GM accuracy_score(Valid): 0.35294117647058826
+Epoch: 11	Test LR accuracy_score: 0.334
+Epoch: 11	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 12	 Test GM accuracy_score: 0.37
+Epoch: 12	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 12	Test LR accuracy_score: 0.338
+Epoch: 12	LR accuracy_score(Valid): 0.3235294117647059
+Epoch: 13	 Test GM accuracy_score: 0.37
+Epoch: 13	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 13	Test LR accuracy_score: 0.32
+Epoch: 13	LR accuracy_score(Valid): 0.3088235294117647
+Epoch: 14	 Test GM accuracy_score: 0.336
+Epoch: 14	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 14	Test LR accuracy_score: 0.332
+Epoch: 14	LR accuracy_score(Valid): 0.29411764705882354
+Epoch: 15	 Test GM accuracy_score: 0.332
+Epoch: 15	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 15	Test LR accuracy_score: 0.318
+Epoch: 15	LR accuracy_score(Valid): 0.27941176470588236
+Epoch: 16	 Test GM accuracy_score: 0.336
+Epoch: 16	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 16	Test LR accuracy_score: 0.322
+Epoch: 16	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 17	 Test GM accuracy_score: 0.336
+Epoch: 17	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 17	Test LR accuracy_score: 0.304
+Epoch: 17	LR accuracy_score(Valid): 0.27941176470588236
+Epoch: 18	 Test GM accuracy_score: 0.336
+Epoch: 18	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 18	Test LR accuracy_score: 0.318
+Epoch: 18	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 19	 Test GM accuracy_score: 0.334
+Epoch: 19	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 19	Test LR accuracy_score: 0.32
+Epoch: 19	LR accuracy_score(Valid): 0.27941176470588236
+Epoch: 20	 Test GM accuracy_score: 0.334
+Epoch: 20	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 20	Test LR accuracy_score: 0.32
+Epoch: 20	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 21	 Test GM accuracy_score: 0.334
+Epoch: 21	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 21	Test LR accuracy_score: 0.322
+Epoch: 21	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 22	 Test GM accuracy_score: 0.334
+Epoch: 22	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 22	Test LR accuracy_score: 0.326
+Epoch: 22	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 23	 Test GM accuracy_score: 0.334
+Epoch: 23	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 23	Test LR accuracy_score: 0.318
+Epoch: 23	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 24	 Test GM accuracy_score: 0.334
+Epoch: 24	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 24	Test LR accuracy_score: 0.316
+Epoch: 24	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 25	 Test GM accuracy_score: 0.334
+Epoch: 25	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 25	Test LR accuracy_score: 0.318
+Epoch: 25	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 26	 Test GM accuracy_score: 0.336
+Epoch: 26	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 26	Test LR accuracy_score: 0.316
+Epoch: 26	LR accuracy_score(Valid): 0.2647058823529412
+Early Stopping at 0 0.478 0.276
+Validation score Early Stopping at 0 0.2647058823529412 0.5588235294117647
+Run 	 1 Epoch, GM, LR 	 0 0.478 0.276
+Run 	 1 GM Val, LR Val 	 26 0.5588235294117647 0.2647058823529412
+num runs are  trec_sup/l12346 5
+Epoch: 0	 Test GM accuracy_score: 0.556
+Epoch: 0	GM accuracy_score(Valid): 0.4852941176470588
+Epoch: 0	Test LR accuracy_score: 0.276
+Epoch: 0	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 1	 Test GM accuracy_score: 0.554
+Epoch: 1	GM accuracy_score(Valid): 0.5147058823529411
+Epoch: 1	Test LR accuracy_score: 0.276
+Epoch: 1	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 2	 Test GM accuracy_score: 0.55
+Epoch: 2	GM accuracy_score(Valid): 0.4411764705882353
+Epoch: 2	Test LR accuracy_score: 0.276
+Epoch: 2	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 3	 Test GM accuracy_score: 0.55
+Epoch: 3	GM accuracy_score(Valid): 0.4411764705882353
+Epoch: 3	Test LR accuracy_score: 0.284
+Epoch: 3	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 4	 Test GM accuracy_score: 0.52
+Epoch: 4	GM accuracy_score(Valid): 0.4411764705882353
+Epoch: 4	Test LR accuracy_score: 0.31
+Epoch: 4	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 5	 Test GM accuracy_score: 0.52
+Epoch: 5	GM accuracy_score(Valid): 0.4411764705882353
+Epoch: 5	Test LR accuracy_score: 0.322
+Epoch: 5	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 6	 Test GM accuracy_score: 0.484
+Epoch: 6	GM accuracy_score(Valid): 0.4264705882352941
+Epoch: 6	Test LR accuracy_score: 0.35
+Epoch: 6	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 7	 Test GM accuracy_score: 0.43
+Epoch: 7	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 7	Test LR accuracy_score: 0.386
+Epoch: 7	LR accuracy_score(Valid): 0.35294117647058826
+Epoch: 8	 Test GM accuracy_score: 0.43
+Epoch: 8	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 8	Test LR accuracy_score: 0.332
+Epoch: 8	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 9	 Test GM accuracy_score: 0.386
+Epoch: 9	GM accuracy_score(Valid): 0.29411764705882354
+Epoch: 9	Test LR accuracy_score: 0.348
+Epoch: 9	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 10	 Test GM accuracy_score: 0.386
+Epoch: 10	GM accuracy_score(Valid): 0.29411764705882354
+Epoch: 10	Test LR accuracy_score: 0.344
+Epoch: 10	LR accuracy_score(Valid): 0.3235294117647059
+Epoch: 11	 Test GM accuracy_score: 0.382
+Epoch: 11	GM accuracy_score(Valid): 0.29411764705882354
+Epoch: 11	Test LR accuracy_score: 0.34
+Epoch: 11	LR accuracy_score(Valid): 0.3088235294117647
+Epoch: 12	 Test GM accuracy_score: 0.37
+Epoch: 12	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 12	Test LR accuracy_score: 0.328
+Epoch: 12	LR accuracy_score(Valid): 0.3088235294117647
+Epoch: 13	 Test GM accuracy_score: 0.336
+Epoch: 13	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 13	Test LR accuracy_score: 0.326
+Epoch: 13	LR accuracy_score(Valid): 0.29411764705882354
+Epoch: 14	 Test GM accuracy_score: 0.336
+Epoch: 14	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 14	Test LR accuracy_score: 0.326
+Epoch: 14	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 15	 Test GM accuracy_score: 0.336
+Epoch: 15	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 15	Test LR accuracy_score: 0.33
+Epoch: 15	LR accuracy_score(Valid): 0.27941176470588236
+Epoch: 16	 Test GM accuracy_score: 0.336
+Epoch: 16	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 16	Test LR accuracy_score: 0.32
+Epoch: 16	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 17	 Test GM accuracy_score: 0.336
+Epoch: 17	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 17	Test LR accuracy_score: 0.32
+Epoch: 17	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 18	 Test GM accuracy_score: 0.336
+Epoch: 18	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 18	Test LR accuracy_score: 0.314
+Epoch: 18	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 19	 Test GM accuracy_score: 0.336
+Epoch: 19	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 19	Test LR accuracy_score: 0.316
+Epoch: 19	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 20	 Test GM accuracy_score: 0.336
+Epoch: 20	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 20	Test LR accuracy_score: 0.318
+Epoch: 20	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 21	 Test GM accuracy_score: 0.336
+Epoch: 21	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 21	Test LR accuracy_score: 0.31
+Epoch: 21	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 22	 Test GM accuracy_score: 0.336
+Epoch: 22	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 22	Test LR accuracy_score: 0.308
+Epoch: 22	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 23	 Test GM accuracy_score: 0.338
+Epoch: 23	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 23	Test LR accuracy_score: 0.32
+Epoch: 23	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 24	 Test GM accuracy_score: 0.336
+Epoch: 24	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 24	Test LR accuracy_score: 0.328
+Epoch: 24	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 25	 Test GM accuracy_score: 0.336
+Epoch: 25	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 25	Test LR accuracy_score: 0.342
+Epoch: 25	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 26	 Test GM accuracy_score: 0.338
+Epoch: 26	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 26	Test LR accuracy_score: 0.324
+Epoch: 26	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 27	 Test GM accuracy_score: 0.336
+Epoch: 27	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 27	Test LR accuracy_score: 0.328
+Epoch: 27	LR accuracy_score(Valid): 0.2647058823529412
+Early Stopping at 1 0.554 0.276
+Validation score Early Stopping at 1 0.2647058823529412 0.5147058823529411
+Run 	 2 Epoch, GM, LR 	 1 0.554 0.276
+Run 	 2 GM Val, LR Val 	 27 0.5147058823529411 0.2647058823529412
+num runs are  trec_sup/l12346 5
+Epoch: 0	 Test GM accuracy_score: 0.498
+Epoch: 0	GM accuracy_score(Valid): 0.4852941176470588
+Epoch: 0	Test LR accuracy_score: 0.276
+Epoch: 0	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 1	 Test GM accuracy_score: 0.512
+Epoch: 1	GM accuracy_score(Valid): 0.5294117647058824
+Epoch: 1	Test LR accuracy_score: 0.276
+Epoch: 1	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 2	 Test GM accuracy_score: 0.494
+Epoch: 2	GM accuracy_score(Valid): 0.45588235294117646
+Epoch: 2	Test LR accuracy_score: 0.276
+Epoch: 2	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 3	 Test GM accuracy_score: 0.47
+Epoch: 3	GM accuracy_score(Valid): 0.4411764705882353
+Epoch: 3	Test LR accuracy_score: 0.276
+Epoch: 3	LR accuracy_score(Valid): 0.3235294117647059
+Epoch: 4	 Test GM accuracy_score: 0.498
+Epoch: 4	GM accuracy_score(Valid): 0.45588235294117646
+Epoch: 4	Test LR accuracy_score: 0.314
+Epoch: 4	LR accuracy_score(Valid): 0.35294117647058826
+Epoch: 5	 Test GM accuracy_score: 0.498
+Epoch: 5	GM accuracy_score(Valid): 0.4411764705882353
+Epoch: 5	Test LR accuracy_score: 0.354
+Epoch: 5	LR accuracy_score(Valid): 0.36764705882352944
+Epoch: 6	 Test GM accuracy_score: 0.49
+Epoch: 6	GM accuracy_score(Valid): 0.4411764705882353
+Epoch: 6	Test LR accuracy_score: 0.404
+Epoch: 6	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 7	 Test GM accuracy_score: 0.466
+Epoch: 7	GM accuracy_score(Valid): 0.38235294117647056
+Epoch: 7	Test LR accuracy_score: 0.382
+Epoch: 7	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 8	 Test GM accuracy_score: 0.43
+Epoch: 8	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 8	Test LR accuracy_score: 0.354
+Epoch: 8	LR accuracy_score(Valid): 0.35294117647058826
+Epoch: 9	 Test GM accuracy_score: 0.43
+Epoch: 9	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 9	Test LR accuracy_score: 0.394
+Epoch: 9	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 10	 Test GM accuracy_score: 0.384
+Epoch: 10	GM accuracy_score(Valid): 0.29411764705882354
+Epoch: 10	Test LR accuracy_score: 0.31
+Epoch: 10	LR accuracy_score(Valid): 0.29411764705882354
+Epoch: 11	 Test GM accuracy_score: 0.382
+Epoch: 11	GM accuracy_score(Valid): 0.29411764705882354
+Epoch: 11	Test LR accuracy_score: 0.318
+Epoch: 11	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 12	 Test GM accuracy_score: 0.336
+Epoch: 12	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 12	Test LR accuracy_score: 0.32
+Epoch: 12	LR accuracy_score(Valid): 0.27941176470588236
+Epoch: 13	 Test GM accuracy_score: 0.336
+Epoch: 13	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 13	Test LR accuracy_score: 0.322
+Epoch: 13	LR accuracy_score(Valid): 0.27941176470588236
+Epoch: 14	 Test GM accuracy_score: 0.336
+Epoch: 14	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 14	Test LR accuracy_score: 0.322
+Epoch: 14	LR accuracy_score(Valid): 0.27941176470588236
+Epoch: 15	 Test GM accuracy_score: 0.336
+Epoch: 15	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 15	Test LR accuracy_score: 0.324
+Epoch: 15	LR accuracy_score(Valid): 0.27941176470588236
+Epoch: 16	 Test GM accuracy_score: 0.336
+Epoch: 16	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 16	Test LR accuracy_score: 0.324
+Epoch: 16	LR accuracy_score(Valid): 0.27941176470588236
+Epoch: 17	 Test GM accuracy_score: 0.336
+Epoch: 17	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 17	Test LR accuracy_score: 0.338
+Epoch: 17	LR accuracy_score(Valid): 0.27941176470588236
+Epoch: 18	 Test GM accuracy_score: 0.336
+Epoch: 18	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 18	Test LR accuracy_score: 0.328
+Epoch: 18	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 19	 Test GM accuracy_score: 0.336
+Epoch: 19	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 19	Test LR accuracy_score: 0.336
+Epoch: 19	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 20	 Test GM accuracy_score: 0.336
+Epoch: 20	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 20	Test LR accuracy_score: 0.326
+Epoch: 20	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 21	 Test GM accuracy_score: 0.338
+Epoch: 21	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 21	Test LR accuracy_score: 0.32
+Epoch: 21	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 22	 Test GM accuracy_score: 0.338
+Epoch: 22	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 22	Test LR accuracy_score: 0.324
+Epoch: 22	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 23	 Test GM accuracy_score: 0.338
+Epoch: 23	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 23	Test LR accuracy_score: 0.332
+Epoch: 23	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 24	 Test GM accuracy_score: 0.338
+Epoch: 24	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 24	Test LR accuracy_score: 0.33
+Epoch: 24	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 25	 Test GM accuracy_score: 0.338
+Epoch: 25	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 25	Test LR accuracy_score: 0.326
+Epoch: 25	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 26	 Test GM accuracy_score: 0.338
+Epoch: 26	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 26	Test LR accuracy_score: 0.33
+Epoch: 26	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 27	 Test GM accuracy_score: 0.338
+Epoch: 27	GM accuracy_score(Valid): 0.27941176470588236
+Epoch: 27	Test LR accuracy_score: 0.324
+Epoch: 27	LR accuracy_score(Valid): 0.2647058823529412
+Early Stopping at 1 0.512 0.276
+Validation score Early Stopping at 1 0.2647058823529412 0.5294117647058824
+Run 	 3 Epoch, GM, LR 	 1 0.512 0.276
+Run 	 3 GM Val, LR Val 	 27 0.5294117647058824 0.2647058823529412
+num runs are  trec_sup/l12346 5
+Epoch: 0	 Test GM accuracy_score: 0.348
+Epoch: 0	GM accuracy_score(Valid): 0.5
+Epoch: 0	Test LR accuracy_score: 0.188
+Epoch: 0	LR accuracy_score(Valid): 0.20588235294117646
+Epoch: 1	 Test GM accuracy_score: 0.434
+Epoch: 1	GM accuracy_score(Valid): 0.5735294117647058
+Epoch: 1	Test LR accuracy_score: 0.188
+Epoch: 1	LR accuracy_score(Valid): 0.20588235294117646
+Epoch: 2	 Test GM accuracy_score: 0.44
+Epoch: 2	GM accuracy_score(Valid): 0.5441176470588235
+Epoch: 2	Test LR accuracy_score: 0.188
+Epoch: 2	LR accuracy_score(Valid): 0.25
+Epoch: 3	 Test GM accuracy_score: 0.44
+Epoch: 3	GM accuracy_score(Valid): 0.5294117647058824
+Epoch: 3	Test LR accuracy_score: 0.188
+Epoch: 3	LR accuracy_score(Valid): 0.2647058823529412
+Epoch: 4	 Test GM accuracy_score: 0.35
+Epoch: 4	GM accuracy_score(Valid): 0.4411764705882353
+Epoch: 4	Test LR accuracy_score: 0.266
+Epoch: 4	LR accuracy_score(Valid): 0.4264705882352941
+Epoch: 5	 Test GM accuracy_score: 0.35
+Epoch: 5	GM accuracy_score(Valid): 0.4411764705882353
+Epoch: 5	Test LR accuracy_score: 0.248
+Epoch: 5	LR accuracy_score(Valid): 0.38235294117647056
+Epoch: 6	 Test GM accuracy_score: 0.35
+Epoch: 6	GM accuracy_score(Valid): 0.4411764705882353
+Epoch: 6	Test LR accuracy_score: 0.258
+Epoch: 6	LR accuracy_score(Valid): 0.36764705882352944
+Epoch: 7	 Test GM accuracy_score: 0.314
+Epoch: 7	GM accuracy_score(Valid): 0.4264705882352941
+Epoch: 7	Test LR accuracy_score: 0.252
+Epoch: 7	LR accuracy_score(Valid): 0.3382352941176471
+Epoch: 8	 Test GM accuracy_score: 0.3
+Epoch: 8	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 8	Test LR accuracy_score: 0.336
+Epoch: 8	LR accuracy_score(Valid): 0.39705882352941174
+Epoch: 9	 Test GM accuracy_score: 0.302
+Epoch: 9	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 9	Test LR accuracy_score: 0.388
+Epoch: 9	LR accuracy_score(Valid): 0.39705882352941174
+Epoch: 10	 Test GM accuracy_score: 0.302
+Epoch: 10	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 10	Test LR accuracy_score: 0.286
+Epoch: 10	LR accuracy_score(Valid): 0.3235294117647059
+Epoch: 11	 Test GM accuracy_score: 0.302
+Epoch: 11	GM accuracy_score(Valid): 0.36764705882352944
+Epoch: 11	Test LR accuracy_score: 0.344
+Epoch: 11	LR accuracy_score(Valid): 0.35294117647058826
+Epoch: 12	 Test GM accuracy_score: 0.258
+Epoch: 12	GM accuracy_score(Valid): 0.29411764705882354
+Epoch: 12	Test LR accuracy_score: 0.254
+Epoch: 12	LR accuracy_score(Valid): 0.27941176470588236
+Epoch: 13	 Test GM accuracy_score: 0.256
+Epoch: 13	GM accuracy_score(Valid): 0.22058823529411764
+Epoch: 13	Test LR accuracy_score: 0.262
+Epoch: 13	LR accuracy_score(Valid): 0.27941176470588236
+Epoch: 14	 Test GM accuracy_score: 0.256
+Epoch: 14	GM accuracy_score(Valid): 0.22058823529411764
+Epoch: 14	Test LR accuracy_score: 0.248
+Epoch: 14	LR accuracy_score(Valid): 0.23529411764705882
+Epoch: 15	 Test GM accuracy_score: 0.222
+Epoch: 15	GM accuracy_score(Valid): 0.22058823529411764
+Epoch: 15	Test LR accuracy_score: 0.258
+Epoch: 15	LR accuracy_score(Valid): 0.23529411764705882
+Epoch: 16	 Test GM accuracy_score: 0.222
+Epoch: 16	GM accuracy_score(Valid): 0.22058823529411764
+Epoch: 16	Test LR accuracy_score: 0.264
+Epoch: 16	LR accuracy_score(Valid): 0.25
+Epoch: 17	 Test GM accuracy_score: 0.222
+Epoch: 17	GM accuracy_score(Valid): 0.22058823529411764
+Epoch: 17	Test LR accuracy_score: 0.276
+Epoch: 17	LR accuracy_score(Valid): 0.22058823529411764
+Epoch: 18	 Test GM accuracy_score: 0.222
+Epoch: 18	GM accuracy_score(Valid): 0.22058823529411764
+Epoch: 18	Test LR accuracy_score: 0.266
+Epoch: 18	LR accuracy_score(Valid): 0.20588235294117646
+Epoch: 19	 Test GM accuracy_score: 0.224
+Epoch: 19	GM accuracy_score(Valid): 0.22058823529411764
+Epoch: 19	Test LR accuracy_score: 0.248
+Epoch: 19	LR accuracy_score(Valid): 0.20588235294117646
+Epoch: 20	 Test GM accuracy_score: 0.224
+Epoch: 20	GM accuracy_score(Valid): 0.22058823529411764
+Epoch: 20	Test LR accuracy_score: 0.252
+Epoch: 20	LR accuracy_score(Valid): 0.22058823529411764
+Epoch: 21	 Test GM accuracy_score: 0.224
+Epoch: 21	GM accuracy_score(Valid): 0.22058823529411764
+Epoch: 21	Test LR accuracy_score: 0.246
+Epoch: 21	LR accuracy_score(Valid): 0.22058823529411764
+Epoch: 22	 Test GM accuracy_score: 0.224
+Epoch: 22	GM accuracy_score(Valid): 0.22058823529411764
+Epoch: 22	Test LR accuracy_score: 0.242
+Epoch: 22	LR accuracy_score(Valid): 0.22058823529411764
+Epoch: 23	 Test GM accuracy_score: 0.226
+Epoch: 23	GM accuracy_score(Valid): 0.22058823529411764
+Epoch: 23	Test LR accuracy_score: 0.238
+Epoch: 23	LR accuracy_score(Valid): 0.22058823529411764
+Epoch: 24	 Test GM accuracy_score: 0.226
+Epoch: 24	GM accuracy_score(Valid): 0.22058823529411764
+Epoch: 24	Test LR accuracy_score: 0.236
+Epoch: 24	LR accuracy_score(Valid): 0.20588235294117646
+Epoch: 25	 Test GM accuracy_score: 0.226
+Epoch: 25	GM accuracy_score(Valid): 0.22058823529411764
+Epoch: 25	Test LR accuracy_score: 0.238
+Epoch: 25	LR accuracy_score(Valid): 0.22058823529411764
+Epoch: 26	 Test GM accuracy_score: 0.226
+Epoch: 26	GM accuracy_score(Valid): 0.22058823529411764
+Epoch: 26	Test LR accuracy_score: 0.238
+Epoch: 26	LR accuracy_score(Valid): 0.20588235294117646
+Epoch: 27	 Test GM accuracy_score: 0.226
+Epoch: 27	GM accuracy_score(Valid): 0.22058823529411764
+Epoch: 27	Test LR accuracy_score: 0.23
+Epoch: 27	LR accuracy_score(Valid): 0.20588235294117646
+Early Stopping at 1 0.434 0.188
+Validation score Early Stopping at 1 0.20588235294117646 0.5735294117647058
+Run 	 4 Epoch, GM, LR 	 1 0.434 0.188
+Run 	 4 GM Val, LR Val 	 27 0.5735294117647058 0.20588235294117646
+Averaged scores are for GM,LR 0.4908 0.2584
+VALIDATION Averaged scores are for GM,LR 0.5411764705882354 0.2529411764705882

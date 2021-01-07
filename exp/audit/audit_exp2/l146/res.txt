@@ -1,0 +1,5 @@
+Length of U is 217
+num runs are  audit_exp2/l146 2
+Run 	 0 Epoch, GM, LR 	 13 0.5939393939393939 0.6423841059602649
+Run 	 0 GM Val, LR Val 	 99 0.20879120879120877 0.3064516129032258
+num runs are  audit_exp2/l146 2

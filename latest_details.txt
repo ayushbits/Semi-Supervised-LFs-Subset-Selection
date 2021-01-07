@@ -1,0 +1,5 @@
+Generic files for the code have been developed
+Use tr_imdb.sh and use similar arguments to run other files such as
+* generic_*
+
+the LFs would be represented by the k.npy file located in the respective dataset directory

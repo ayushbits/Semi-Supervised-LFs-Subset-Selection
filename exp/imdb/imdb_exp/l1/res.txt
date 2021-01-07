@@ -1,0 +1,11 @@
+no of excludings are  357
+Length of U is 495
+number of lfs  25
+before  tensor([0.9000, 0.9000, 0.9000,  ..., 0.9000, 0.9000, 0.9000])
+torch.Size([284, 25])
+tensor([0, 0, 0,  ..., 0, 0, 0])
+num runs are  imdb_exp/l1 1
+Run 	 0 Epoch, GM, LR 	 6 0.0 0.7751937984496124
+Run 	 0 GM Val, LR Val 	 99 0.0 0.732876712328767
+Averaged scores are for GM,LR 0.0 0.7751937984496124
+VALIDATION Averaged scores are for GM,LR 0.0 0.732876712328767

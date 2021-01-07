@@ -246,8 +246,7 @@ for lo in range(0,num_runs):
                 loss_3 = 0
 
             if (sys.argv[5] == 'l4' and len(supervised_indices) > 0):
-                loss_4 = log_likelihood_loss_supervised(theta, pi_y, pi, sample[1][supervised_indices], sample[2][supervised_indices], sample[3][supervised_indices], k, n_classes,
-                                                        continuous_mask)
+                loss_4 = log_likelihood_loss_supervised(theta, pi_y, pi, sample[1][supervised_indices], sample[2][supervised_indices], sample[3][supervised_indices], k, n_classes, continuous_mask)
             else:
                 loss_4 = 0
 
@@ -277,7 +276,7 @@ for lo in range(0,num_runs):
                 prec_loss =0
 
             loss = loss_1 + loss_2 + loss_3 + loss_4 + loss_6+loss_5 + prec_loss
-            # print('loss is',loss)
+#            print('loss is',loss_1, loss_2, loss_3, loss_4, loss_5, loss_6, prec_loss)
             if loss != 0:
                 loss.backward()
                 optimizer_gm.step()
@@ -286,7 +285,10 @@ for lo in range(0,num_runs):
         #print(lr_model.state_dict())
         #print(theta,pi)
         #Test
+#        print('no of classes ', n_classes)
+#        print(y_test)
         y_pred = np.argmax(probability(theta, pi_y, pi, l_test, s_test, k, n_classes, continuous_mask).detach().numpy(), 1)
+#        print(y_pred)
         gm_acc = f1_score(y_test, y_pred)
         #Valid
         y_pred = np.argmax(probability(theta, pi_y, pi, l_valid, s_valid, k, n_classes, continuous_mask).detach().numpy(), 1)

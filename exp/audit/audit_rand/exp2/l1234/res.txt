@@ -1,0 +1,11 @@
+Length of U is 217
+before  tensor([0.9000, 0.9000, 0.9000,  ..., 0.9000, 0.9000, 0.9000])
+num runs are  audit_rand/exp2/l1234 2
+num runs are  audit_rand/exp2/l1234 2
+Run 	 0 Epoch, GM, LR 	 43 0.9109947643979057 0.9050279329608939
+Run 	 0 GM Val, LR Val 	 99 0.7333333333333334 0.8125000000000001
+num runs are  audit_rand/exp2/l1234 2
+Run 	 1 Epoch, GM, LR 	 3 0.9148936170212767 0.7071823204419889
+Run 	 1 GM Val, LR Val 	 99 0.7333333333333334 0.3582089552238806
+Averaged scores are for GM,LR 0.9129441907095912 0.8061051267014414
+VALIDATION Averaged scores are for GM,LR 0.7333333333333334 0.5853544776119404

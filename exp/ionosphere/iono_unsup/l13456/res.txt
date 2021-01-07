@@ -1,0 +1,6 @@
+Length of U is 98
+num runs are  iono_unsup/l13456 5
+num runs are  iono_unsup/l13456 5
+Run 	 0 Epoch, GM, LR 	 0 0.0 0.8444444444444443
+Run 	 0 GM Val, LR Val 	 99 0.0 0.5128205128205128
+num runs are  iono_unsup/l13456 5

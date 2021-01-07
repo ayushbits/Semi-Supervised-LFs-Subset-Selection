@@ -1,0 +1,28 @@
+Length of U is 4723
+num runs are  trec_exp1/l123456 5
+Early Stopping at 3 0.522 0.544
+Validation score Early Stopping at 3 0.5147058823529411 0.5
+Run 	 0 Epoch, GM, LR 	 3 0.522 0.544
+Run 	 0 GM Val, LR Val 	 11 0.5 0.5147058823529411
+num runs are  trec_exp1/l123456 5
+Early Stopping at 1 0.522 0.532
+Validation score Early Stopping at 1 0.5147058823529411 0.5
+Run 	 1 Epoch, GM, LR 	 1 0.522 0.532
+Run 	 1 GM Val, LR Val 	 9 0.5 0.5147058823529411
+num runs are  trec_exp1/l123456 5
+Early Stopping at 15 0.316 0.346
+Validation score Early Stopping at 15 0.38235294117647056 0.4117647058823529
+Run 	 2 Epoch, GM, LR 	 15 0.316 0.346
+Run 	 2 GM Val, LR Val 	 23 0.4117647058823529 0.38235294117647056
+num runs are  trec_exp1/l123456 5
+Early Stopping at 3 0.288 0.314
+Validation score Early Stopping at 3 0.5147058823529411 0.4852941176470588
+Run 	 3 Epoch, GM, LR 	 3 0.288 0.314
+Run 	 3 GM Val, LR Val 	 11 0.4852941176470588 0.5147058823529411
+num runs are  trec_exp1/l123456 5
+Early Stopping at 2 0.442 0.53
+Validation score Early Stopping at 2 0.5735294117647058 0.5588235294117647
+Run 	 4 Epoch, GM, LR 	 2 0.442 0.53
+Run 	 4 GM Val, LR Val 	 10 0.5588235294117647 0.5735294117647058
+Averaged scores are for GM,LR 0.41800000000000004 0.4532
+VALIDATION Averaged scores are for GM,LR 0.4911764705882353 0.5

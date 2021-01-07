@@ -1,0 +1,18 @@
+Length of U is 218
+num runs are  audit_exp1/l13456 5
+Run 	 0 Epoch, GM, LR 	 97 0.3636363636363636 0.48648648648648646
+Run 	 0 GM Val, LR Val 	 99 0.6666666666666666 0.6588235294117647
+num runs are  audit_exp1/l13456 5
+Run 	 1 Epoch, GM, LR 	 0 0 0
+Run 	 1 GM Val, LR Val 	 99 0 0
+num runs are  audit_exp1/l13456 5
+Run 	 2 Epoch, GM, LR 	 46 0.7307692307692308 0.07142857142857142
+Run 	 2 GM Val, LR Val 	 99 0.7768595041322314 0.326241134751773
+num runs are  audit_exp1/l13456 5
+Run 	 3 Epoch, GM, LR 	 66 0.3636363636363636 0.0
+Run 	 3 GM Val, LR Val 	 99 0.6666666666666666 0.792079207920792
+num runs are  audit_exp1/l13456 5
+Run 	 4 Epoch, GM, LR 	 0 0 0
+Run 	 4 GM Val, LR Val 	 99 0 0
+Averaged scores are for GM,LR 0.2916083916083916 0.11158301158301158
+VALIDATION Averaged scores are for GM,LR 0.4220385674931129 0.35542877441686593
