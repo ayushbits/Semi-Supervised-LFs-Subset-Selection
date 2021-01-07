@@ -1,8 +1,0 @@
-Length of U is 98
-num runs are  iono/l146 5
-Run 	 0 Epoch, GM, LR 	 97 0.8666666666666666 0.8603351955307262
-Run 	 0 GM Val, LR Val 	 99 0.8 0.918918918918919
-num runs are  iono/l146 5
-Run 	 1 Epoch, GM, LR 	 78 0.8666666666666666 0.8972972972972973
-Run 	 1 GM Val, LR Val 	 99 0.8219178082191781 0.918918918918919
-num runs are  iono/l146 5
