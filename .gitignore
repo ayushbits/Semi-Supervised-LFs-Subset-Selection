@@ -12,6 +12,7 @@ datasets/ionosphere
 datasets/breast_cancer
 datasets/glass_identification
 datasets/audit
+datasets/imdb_original
 yt_entropy_unsup/*
 mitr_unsup/*
 exps/*

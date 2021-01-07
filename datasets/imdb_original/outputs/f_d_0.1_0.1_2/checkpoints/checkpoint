@@ -1,2 +1,0 @@
-model_checkpoint_path: "/home/ayusham/Semi_Supervised_LFs/datasets/imdb/outputs/f_d_0.1_0.1_2/checkpoints/hls-model-318"
-all_model_checkpoint_paths: "/home/ayusham/Semi_Supervised_LFs/datasets/imdb/outputs/f_d_0.1_0.1_2/checkpoints/hls-model-318"
