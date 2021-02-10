@@ -10,14 +10,15 @@ from losses import *
 import pickle
 from torch.utils.data import TensorDataset, DataLoader
 
-run = 2
+#sys.path.append(r'/home/krishnateja/PycharmProjects/Semi-Supervised-LFs-Subset-Selection')
+run = 1
 
 torch.set_default_dtype(torch.float64)
 torch.set_printoptions(threshold=20)
 
 objs = []
 
-with open('Data/SMS/d_processed.p', 'rb') as f:
+with open('/home/krishnateja/PycharmProjects/Semi-Supervised-LFs-Subset-Selection/Data/SMS/d_processed.p', 'rb') as f:
     while 1:
         try:
             o = pickle.load(f)
@@ -31,7 +32,7 @@ l_supervised = torch.tensor(objs[2]).long()
 s_supervised = torch.tensor(objs[2]).double()
 
 objs = []
-with open('Data/SMS/U_processed.p', 'rb') as f:
+with open('/home/krishnateja/PycharmProjects/Semi-Supervised-LFs-Subset-Selection/Data/SMS/U_processed.p', 'rb') as f:
     while 1:
         try:
             o = pickle.load(f)
@@ -54,7 +55,7 @@ s_unsupervised = s_unsupervised[covered_indices]
 
 
 objs = []
-with open('Data/SMS/validation_processed.p', 'rb') as f:
+with open('/home/krishnateja/PycharmProjects/Semi-Supervised-LFs-Subset-Selection/Data/SMS/validation_processed.p', 'rb') as f:
     while 1:
         try:
             o = pickle.load(f)
@@ -68,7 +69,7 @@ l_valid = torch.tensor(objs[2]).long()[-69:]
 s_valid = torch.tensor(objs[2]).double()[-69:]
 
 objs1 = []
-with open('Data/SMS/test_processed.p', 'rb') as f:
+with open('/home/krishnateja/PycharmProjects/Semi-Supervised-LFs-Subset-Selection/Data/SMS/test_processed.p', 'rb') as f:
     while 1:
         try:
             o = pickle.load(f)
@@ -278,8 +279,8 @@ for epoch in range(100):
             'pi': pi,
         }
 
-        torch.save(checkpoint, "models/sms/run {}/sms_gm_{}.pt".format(run, loss_type))
-        torch.save(lr_model.state_dict(), "models/sms/run {}/sms_lr_{}.pt".format(run, loss_type))
+        torch.save(checkpoint, "/home/krishnateja/PycharmProjects/Semi-Supervised-LFs-Subset-Selection/models/sms/run {}/sms_gm_{}.pt".format(run, loss_type))
+        torch.save(lr_model.state_dict(), "/home/krishnateja/PycharmProjects/Semi-Supervised-LFs-Subset-Selection/models/sms/run {}/sms_lr_{}.pt".format(run, loss_type))
     print("Epoch: {}\tf1_score(Valid): {}".format(epoch, f1_score(y_valid, y_pred)))
     if score == 1:
         break
