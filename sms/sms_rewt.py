@@ -2,13 +2,68 @@ import torch
 import sys
 import numpy as np
 from deep_net import *
-from logistic_regression import *
-from sklearn.metrics import f1_score
 from weighted_cage import *
-from sklearn.feature_extraction.text import TfidfVectorizer
 from losses import *
 import pickle
 from torch.utils.data import TensorDataset, DataLoader
+import higher
+import copy
+
+
+def rewt_lfs(sample, lr_model, theta, pi_y, pi, wts):
+    wts_param = torch.nn.Parameter(wts, requires_grad=True)
+    lr_model.register_parameter("wts", wts_param)
+    theta_param = torch.nn.Parameter(theta, requires_grad=True)
+    lr_model.register_parameter("theta", theta_param)
+    pi_y_param = torch.nn.Parameter(pi_y, requires_grad=True)
+    lr_model.register_parameter("pi_y", pi_y_param)
+    pi_param = torch.nn.Parameter(pi, requires_grad=True)
+    lr_model.register_parameter("pi", pi_param)
+    optimizer = torch.optim.Adam([
+                {'params': lr_model.linear_1.parameters()},
+                {'params':lr_model.linear_2.parameters()},
+                {'params':lr_model.out.parameters()},
+                {'params': [lr_model.theta, lr_model.pi, lr_model.pi_y], 'lr': 0.01, 'weight_decay':0}
+            ], lr=1e-4)
+    with higher.innerloop_ctx(lr_model, optimizer) as (fmodel, diffopt):
+        supervised_criterion = torch.nn.CrossEntropyLoss()
+        optimizer.zero_grad()
+        supervised_indices = sample[4].nonzero().view(-1)
+        unsupervised_indices = (1 - sample[4]).nonzero().squeeze()
+        if len(supervised_indices) > 0:
+            loss_1 = supervised_criterion(fmodel(sample[0][supervised_indices]), sample[1][supervised_indices])
+        else:
+            loss_1 = 0
+        unsupervised_lr_probability = torch.nn.Softmax(dim=1)(fmodel(sample[0][unsupervised_indices]))
+        loss_2 = entropy(unsupervised_lr_probability)
+        y_pred_unsupervised = np.argmax(
+            probability(fmodel.theta, fmodel.pi_y, fmodel.pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], k, n_classes,
+                        continuous_mask, fmodel.wts).detach().numpy(), 1)
+        loss_3 = supervised_criterion(fmodel(sample[0][unsupervised_indices]), torch.tensor(y_pred_unsupervised))
+        if len(supervised_indices) > 0:
+            loss_4 = log_likelihood_loss_supervised(fmodel.theta, fmodel.pi_y, fmodel.pi, sample[1][supervised_indices],
+                                                    sample[2][supervised_indices], sample[3][supervised_indices], k,
+                                                    n_classes,
+                                                    continuous_mask, fmodel.wts)
+        else:
+            loss_4 = 0
+        loss_5 = log_likelihood_loss(fmodel.theta, fmodel.pi_y, fmodel.pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices],
+                                     k, n_classes, continuous_mask, fmodel.wts)
+        prec_loss = precision_loss(fmodel.theta, k, n_classes, a, fmodel.wts)
+        probs_graphical = probability(fmodel.theta, fmodel.pi_y, fmodel.pi, sample[2], sample[3], k, n_classes, continuous_mask, fmodel.wts)
+        probs_graphical = (probs_graphical.T / probs_graphical.sum(1)).T
+        probs_lr = torch.nn.Softmax(dim=1)(fmodel(sample[0]))
+        loss_6 = kl_divergence(probs_graphical, probs_lr)
+        loss = loss_1 + loss_2 + loss_4 + loss_6 + loss_3 + loss_5 + prec_loss
+        diffopt.step(loss)
+        valid_loss = supervised_criterion(fmodel(x_valid), y_valid) #+ 1e-20 * torch.norm(list(fmodel.parameters(time=0))[0], p=1)
+        grad_all = torch.autograd.grad(valid_loss, list(fmodel.parameters(time=0))[0], only_inputs=True)[0]
+        if torch.norm(grad_all, p=2) != 0:
+            temp_wts = torch.clamp(wts-10*(grad_all/torch.norm(grad_all, p=2)), min=0, max=1)
+        else:
+            temp_wts = wts
+        return temp_wts
+
 
 #sys.path.append(r'/home/krishnateja/PycharmProjects/Semi-Supervised-LFs-Subset-Selection')
 run = 1
@@ -17,7 +72,6 @@ torch.set_default_dtype(torch.float64)
 torch.set_printoptions(threshold=20)
 
 objs = []
-
 with open('/home/krishnateja/PycharmProjects/Semi-Supervised-LFs-Subset-Selection/Data/SMS/d_processed.p', 'rb') as f:
     while 1:
         try:
@@ -50,9 +104,6 @@ x_unsupervised = x_unsupervised[covered_indices]
 y_unsupervised = y_unsupervised[covered_indices]
 l_unsupervised = l_unsupervised[covered_indices]
 s_unsupervised = s_unsupervised[covered_indices]
-
-
-
 
 objs = []
 with open('/home/krishnateja/PycharmProjects/Semi-Supervised-LFs-Subset-Selection/Data/SMS/validation_processed.p', 'rb') as f:
@@ -137,23 +188,24 @@ theta.requires_grad = True
 pi_y.requires_grad = True
 
 lr_model = DeepNet(n_features, n_hidden, n_classes)
-#lr_model = LogisticRegression(n_features, n_classes)
-
-# optimizer = torch.optim.Adam([{"params": nn_model.parameters()}, {"params": [pi, pi_y, theta]}], lr=0.001)
 optimizer_lr = torch.optim.Adam(lr_model.parameters(), lr=0.0001)
 optimizer_gm = torch.optim.Adam([theta, pi, pi_y], lr=0.01, weight_decay=0)
-# optimizer = torch.optim.Adam([theta, pi, pi_y], lr=0.01, weight_decay=0)
 supervised_criterion = torch.nn.CrossEntropyLoss()
 
 dataset = TensorDataset(x_train, y_train, l, s, supervised_mask)
 loader = DataLoader(dataset, batch_size=256, shuffle=True, pin_memory=True)
 best_score = 0
 best_epoch = 0
-weights = torch.ones(k.shape[0])
+weights = torch.ones(k.shape[0])*(1/k.shape[0])
 for epoch in range(100):
-    # nn_model.train()
     lr_model.train()
     for batch_ndx, sample in enumerate(loader):
+        lr_model1 = DeepNet(n_features, n_hidden, n_classes)
+        lr_model1.load_state_dict(copy.deepcopy(lr_model.state_dict()))
+        theta1 = copy.deepcopy(theta)
+        pi_y1 = copy.deepcopy(pi_y)
+        pi1 = copy.deepcopy(pi)
+        weights = rewt_lfs(sample, lr_model1, theta1, pi_y1, pi1, weights)
         optimizer_lr.zero_grad()
         optimizer_gm.zero_grad()
         supervised_indices = sample[4].nonzero().view(-1)
@@ -164,14 +216,8 @@ for epoch in range(100):
         else:
             loss_1 = 0
 
-        unsupervised_lr_probability = torch.nn.Softmax()(lr_model(sample[0][unsupervised_indices]))
+        unsupervised_lr_probability = torch.nn.Softmax(dim=1)(lr_model(sample[0][unsupervised_indices]))
         loss_2 = entropy(unsupervised_lr_probability)
-
-        # unsupervised_gm_probability = probability(theta, pi_y, pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], k, n_classes,
-        #                                           continuous_mask)
-        # unsupervised_gm_probability = (unsupervised_gm_probability.T / unsupervised_gm_probability.sum(1)).T
-        # entropy_gm = - (unsupervised_gm_probability * torch.log(unsupervised_gm_probability)).sum(1)
-        # indices = torch.topk(entropy_gm, 100, largest=False)[1]
 
         y_pred_unsupervised = np.argmax(
             probability(theta, pi_y, pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], k, n_classes,
@@ -190,74 +236,22 @@ for epoch in range(100):
         loss_5 = log_likelihood_loss(theta, pi_y, pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices],
                                      k, n_classes, continuous_mask, weights)
 
-        prec_loss = precision_loss(theta, k, n_classes, a)
+        prec_loss = precision_loss(theta, k, n_classes, a, weights)
 
         probs_graphical = probability(theta, pi_y, pi, sample[2], sample[3], k, n_classes, continuous_mask, weights)
         probs_graphical = (probs_graphical.T / probs_graphical.sum(1)).T
-        probs_lr = torch.nn.Softmax()(lr_model(sample[0]))
+        probs_lr = torch.nn.Softmax(dim=1)(lr_model(sample[0]))
         loss_6 = kl_divergence(probs_graphical, probs_lr)
-
-        # loss = loss_1 #+ loss_2 + loss_3 + loss_4 + loss_5 + loss_6 + prec_loss
-        # loss = loss_4 + loss_5 + prec_loss
-
-        # if len(supervised_indices) > 0:
-        #     # print(indices)
-        #     # print(supervised_indices.shape)
-        #     # print(torch.cat([supervised_indices, unsupervised_indices[indices]]).shape)
-        #     total_indices = torch.cat([supervised_indices, unsupervised_indices[indices]])
-        #     probs_graphical = probability(theta, pi_y, pi, sample[2][total_indices], sample[3][total_indices], k, n_classes,
-        #                                   continuous_mask)
-        #     probs_graphical = (probs_graphical.T / probs_graphical.sum(1)).T
-        #     probs_lr = torch.nn.Softmax()(lr_model(sample[0][total_indices]))
-        #     loss_6 = kl_divergence(probs_graphical, probs_lr)
-        # else:
-        #     probs_graphical = probability(theta, pi_y, pi, sample[2][indices], sample[3][indices], k, n_classes, continuous_mask)
-        #     probs_graphical = (probs_graphical.T / probs_graphical.sum(1)).T
-        #     probs_lr = torch.nn.Softmax()(lr_model(sample[0][indices]))
-        #     loss_6 = kl_divergence(probs_graphical, probs_lr)
-            # loss_6 = - torch.log(1 - probs_graphical * (1 - probs_lr)).sum(1).mean()
-
         loss = loss_1 + loss_2 + loss_4 + loss_6 + loss_3 + loss_5 + prec_loss
 
         loss.backward()
         optimizer_gm.step()
         optimizer_lr.step()
 
-    # optimizer_lr.zero_grad()
-    # optimizer_gm.zero_grad()
-    #
-    # loss_1 = supervised_criterion(nn_model(x_supervised), y_supervised)
-    #
-    # unsupervised_gm_probability = probability(theta, pi_y, pi, l_unsupervised, s_unsupervised, k, n_classes,
-    #                                           continuous_mask)
-    # unsupervised_gm_probability = (unsupervised_gm_probability.T / unsupervised_gm_probability.sum(1)).T
-    # entropy_gm = - (unsupervised_gm_probability * torch.log(unsupervised_gm_probability)).sum(1)
-    # indices = [torch.topk(entropy_gm, 100, largest=False)[1]]
-    #
-    # y_pred_unsupervised = np.argmax(
-    #     probability(theta, pi_y, pi, l_unsupervised, s_unsupervised, k, n_classes, continuous_mask).detach().numpy(), 1)
-    # loss_3 = supervised_criterion(lr_model(x_unsupervised[indices]), torch.tensor(y_pred_unsupervised)[indices])
-    #
-    # loss_4 = log_likelihood_loss_supervised(theta, pi_y, pi, y_supervised, l_supervised, s_supervised, k, n_classes,
-    #                                         continuous_mask)
-    #
-    # probs_graphical = probability(theta, pi_y, pi, l_supervised, s_supervised, k, n_classes, continuous_mask)
-    # probs_graphical = (probs_graphical.T / probs_graphical.sum(1)).T
-    # probs_lr = torch.nn.Softmax()(nn_model(x_supervised))
-    # loss_6 = kl_divergence(probs_graphical, probs_lr)
-    #
-    # # loss_6 = - torch.log(1 - probs_graphical*(1 - probs_lr)).sum(1).mean()
-    # loss = loss_1 + loss_3 + loss_4 + loss_6 #+ prec_loss
-    #
-    # # print(loss)
-    # loss.backward()
-    # optimizer_gm.step()
-    # optimizer_lr.step()
-
     y_pred = np.argmax(probability(theta, pi_y, pi, l_test, s_test, k, n_classes, continuous_mask, weights).detach().numpy(), 1)
     print("Epoch: {}\tf1_score: {}".format(epoch, f1_score(y_test, y_pred)))
 
-    probs = torch.nn.Softmax()(lr_model(x_test))
+    probs = torch.nn.Softmax(dim=1)(lr_model(x_test))
     y_pred = np.argmax(probs.detach().numpy(), 1)
     print("Epoch: {}\tf1_score: {}".format(epoch, f1_score(y_test, y_pred)))
 
@@ -265,7 +259,7 @@ for epoch in range(100):
                        1)
     print("Epoch: {}\tf1_score(Valid): {}".format(epoch, f1_score(y_valid, y_pred)))
 
-    probs = torch.nn.Softmax()(lr_model(x_valid))
+    probs = torch.nn.Softmax(dim=1)(lr_model(x_valid))
     y_pred = np.argmax(probs.detach().numpy(), 1)
 
     score = f1_score(y_valid, y_pred)
@@ -273,7 +267,6 @@ for epoch in range(100):
         best_epoch = epoch
         best_score = score
         loss_type = "123456p"
-        #run = 2
         checkpoint = {
             'theta': theta,
             'pi': pi,

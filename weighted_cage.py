@@ -8,7 +8,7 @@ def probability_y(pi_y):
 
 
 def phi(theta, l):
-    return  theta * torch.abs(l).double()
+    return theta * torch.abs(l).double()
 
 
 def calculate_normalizer(theta, k, n_classes):
@@ -63,12 +63,12 @@ def log_likelihood_loss_supervised(theta, pi_y, pi, y, l, s, k, n_classes, conti
     # return - torch.log(probability(theta, pi_y, pi, l, s, k, n_classes, continuous_mask)[:, y] + eps).mean()# / s.shape[0]
 
 
-def precision_loss(theta, k, n_classes, a):
+def precision_loss(theta, k, n_classes, a, weights):
     n_lfs = k.shape[0]
     prob = torch.ones(n_lfs, n_classes).double()
     z_per_lf = 0
     for y in range(n_classes):
-        m_y = torch.exp(phi(theta[y], torch.ones(n_lfs)))
+        m_y = torch.exp(phi(theta[y] * weights, torch.ones(n_lfs)))
         per_lf_matrix = torch.tensordot((1 + m_y).view(-1, 1), torch.ones(m_y.shape).double().view(1, -1), 1) - torch.eye(n_lfs).double()
         prob[:, y] = per_lf_matrix.prod(0).double()
         z_per_lf += prob[:, y].double()
