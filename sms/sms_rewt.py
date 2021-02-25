@@ -59,7 +59,7 @@ def rewt_lfs(sample, lr_model, theta, pi_y, pi, wts):
         valid_loss = supervised_criterion(fmodel(x_valid), y_valid) #+ 1e-20 * torch.norm(list(fmodel.parameters(time=0))[0], p=1)
         grad_all = torch.autograd.grad(valid_loss, list(fmodel.parameters(time=0))[0], only_inputs=True)[0]
         if torch.norm(grad_all, p=2) != 0:
-            temp_wts = torch.clamp(wts-10*(grad_all/torch.norm(grad_all, p=2)), min=0, max=1)
+            temp_wts = torch.clamp(wts-5*(grad_all/torch.norm(grad_all, p=2)), min=0, max=1)
         else:
             temp_wts = wts
         return temp_wts
@@ -196,7 +196,7 @@ dataset = TensorDataset(x_train, y_train, l, s, supervised_mask)
 loader = DataLoader(dataset, batch_size=256, shuffle=True, pin_memory=True)
 best_score = 0
 best_epoch = 0
-weights = torch.ones(k.shape[0])*(1/k.shape[0])
+weights = torch.ones(k.shape[0])*0.5 #(1/k.shape[0])
 for epoch in range(100):
     lr_model.train()
     for batch_ndx, sample in enumerate(loader):
