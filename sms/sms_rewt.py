@@ -58,11 +58,11 @@ def rewt_lfs(sample, lr_model, theta, pi_y, pi, wts):
         diffopt.step(loss)
         valid_loss = supervised_criterion(fmodel(x_valid), y_valid) #+ 1e-20 * torch.norm(list(fmodel.parameters(time=0))[0], p=1)
         grad_all = torch.autograd.grad(valid_loss, list(fmodel.parameters(time=0))[0], only_inputs=True)[0]
-        if torch.norm(grad_all, p=2) != 0:
-            temp_wts = torch.clamp(wts-5*(grad_all/torch.norm(grad_all, p=2)), min=0, max=1)
-        else:
-            temp_wts = wts
-        return temp_wts
+    if torch.norm(grad_all, p=2) != 0:
+        temp_wts = torch.clamp(wts-5*(grad_all/torch.norm(grad_all, p=2)), min=0, max=1)
+    else:
+        temp_wts = wts
+    return temp_wts
 
 
 #sys.path.append(r'/home/krishnateja/PycharmProjects/Semi-Supervised-LFs-Subset-Selection')
