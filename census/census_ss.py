@@ -267,7 +267,7 @@ for lo in range(0,num_runs):
             else:
                 prec_loss =0
 
-            loss = loss_1 + loss_2 + loss_3 + loss_4 + loss_6+loss_5 + prec_loss
+            loss = loss_1  + loss_3 + loss_4 + loss_6+loss_5 + prec_loss
             # print('loss is',loss)
             if loss != 0:
                 loss.backward()
@@ -291,10 +291,10 @@ for lo in range(0,num_runs):
         y_pred = np.argmax(probs.detach().numpy(), 1)
         lr_valid_acc = accuracy_score(y_valid, y_pred)
 
-        # print("Epoch: {}\t Test GM accuracy_score: {}".format(epoch, gm_acc ))
-        # print("Epoch: {}\tGM accuracy_score(Valid): {}".format(epoch, gm_valid_acc))
-        # print("Epoch: {}\tTest LR accuracy_score: {}".format(epoch, lr_acc ))    
-        # print("Epoch: {}\tLR accuracy_score(Valid): {}".format(epoch, lr_valid_acc))
+        print("Epoch: {}\t Test GM accuracy_score: {}".format(epoch, gm_acc ))
+        print("Epoch: {}\tGM accuracy_score(Valid): {}".format(epoch, gm_valid_acc))
+        print("Epoch: {}\tTest LR accuracy_score: {}".format(epoch, lr_acc ))    
+        print("Epoch: {}\tLR accuracy_score(Valid): {}".format(epoch, lr_valid_acc))
         
 
         if gm_valid_acc > best_score_gm_val and gm_valid_acc > best_score_lr_val:

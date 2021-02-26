@@ -3,9 +3,8 @@ import sys
 import numpy as np
 from logistic_regression import *
 from deep_net import *
-import warnings
-warnings.filterwarnings("ignore")
-from cage import *
+
+from weighted_cage import *
 from sklearn.feature_extraction.text import TfidfVectorizer
 from losses import *
 import pickle
@@ -29,19 +28,13 @@ lr_fnetwork = float(sys.argv[15])
 lr_gm = float(sys.argv[16])
 name_dset = dset_directory.split("/")[1].lower()
 
-mode = sys.argv[17]
 
 if name_dset =='youtube' or name_dset=='census':
     from sklearn.metrics import accuracy_score as score
 else:
     from sklearn.metrics import f1_score as score
 
-
-if mode != '':
-    fname = dset_directory + "/" + mode + "_d_processed.p"
-else:
-    fname = dset_directory + "/d_processed.p"
-with open(fname, 'rb') as f:
+with open(dset_directory + '/d_processed.p', 'rb') as f:
     while 1:
         try:
             o = pickle.load(f)
@@ -55,12 +48,7 @@ l_supervised = torch.tensor(objs[2]).long()
 s_supervised = torch.tensor(objs[2]).double()
 
 objs = []
-if mode != '':
-    fname = dset_directory + "/" + mode + "_U_processed.p"
-else:
-    fname = dset_directory + "/U_processed.p"
-
-with open(fname, 'rb') as f:
+with open(dset_directory + '/U_processed.p', 'rb') as f:
     while 1:
         try:
             o = pickle.load(f)
@@ -84,12 +72,7 @@ s_unsupervised = torch.tensor(np.delete(objs[2],excl, axis=0)).double()
 print('Length of U is', len(x_unsupervised))
 
 objs = []
-if mode != '':
-    fname = dset_directory + "/" + mode + "_validation_processed.p"
-else:
-    fname = dset_directory + "/validation_processed.p"
-
-with open(fname, 'rb') as f:
+with open(dset_directory + '/validation_processed.p', 'rb') as f:
     while 1:
         try:
             o = pickle.load(f)
@@ -103,13 +86,7 @@ l_valid = torch.tensor(objs[2]).long()
 s_valid = torch.tensor(objs[2]).double()
 
 objs1 = []
-if mode != '':
-    fname = dset_directory + "/" + mode + "_test_processed.p"
-else:
-    fname = dset_directory + "/test_processed.p"
-
-
-with open(fname, 'rb') as f:
+with open(dset_directory + '/test_processed.p', 'rb') as f:
     while 1:
         try:
             o = pickle.load(f)
@@ -129,8 +106,8 @@ n_features = x_supervised.shape[1]
 #lf_classes_file = sys.argv[11]
 
 
-fname = dset_directory + '/' + mode + '_k.npy'
-k = torch.from_numpy(np.load(fname)).long()
+
+k = torch.from_numpy(np.load(dset_directory + '/k.npy')).long()
 n_lfs = len(k)
 print('LFs are ',k)
 print('no of lfs are ', n_lfs)
@@ -203,10 +180,10 @@ supervised_mask = torch.cat([torch.ones(l_supervised.shape[0]), torch.zeros(l_un
 # print('after ',a)
 
 #Setting |validation|=|supevised|
-# x_valid = x_valid[0:len(x_supervised)]
-# y_valid = y_valid[0:len(x_supervised)]
-# s_valid = s_valid[0:len(x_supervised)]
-# l_valid = l_valid[0:len(x_supervised)]
+x_valid = x_valid[0:len(x_supervised)]
+y_valid = y_valid[0:len(x_supervised)]
+s_valid = s_valid[0:len(x_supervised)]
+l_valid = l_valid[0:len(x_supervised)]
 
 # print(l_valid.shape)
 # print(l_valid[0])
@@ -223,6 +200,8 @@ for lo in range(0,num_runs):
 
     pi_y = torch.ones(n_classes).double()
     pi_y.requires_grad = True
+
+    weights = torch.ones(k.shape[0])
 
     if feat_model == 'lr':
         lr_model = LogisticRegression(n_features, n_classes)
@@ -257,8 +236,13 @@ for lo in range(0,num_runs):
             optimizer_lr.zero_grad()
             optimizer_gm.zero_grad()
 
+            
+
+            # Start entropy code
+            # unsupervised_indices = (1-sample[4]).nonzero().squeeze()
             unsup = []
             sup = []
+           
             supervised_indices = sample[4].nonzero().view(-1)
             # unsupervised_indices = indices  ## Uncomment for entropy
             unsupervised_indices = (1-sample[4]).nonzero().squeeze()
@@ -278,30 +262,33 @@ for lo in range(0,num_runs):
             else:
                 loss_2=0
             if(sys.argv[4] =='l3'):
-                # print(theta)
-                y_pred_unsupervised = np.argmax(probability(theta, pi_y, pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], k, n_classes,continuous_mask).detach().numpy(), 1)
+                y_pred_unsupervised = np.argmax(probability(theta, pi_y, pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], k, n_classes,
+                        continuous_mask, weights).detach().numpy(), 1)
                 loss_3 = supervised_criterion(lr_model(sample[0][unsupervised_indices]), torch.tensor(y_pred_unsupervised))
             else:
                 loss_3 = 0
 
             if (sys.argv[5] == 'l4' and len(supervised_indices) > 0):
-                loss_4 = log_likelihood_loss_supervised(theta, pi_y, pi, sample[1][supervised_indices], sample[2][supervised_indices], sample[3][supervised_indices], k, n_classes, continuous_mask)
+                loss_4 = log_likelihood_loss_supervised(theta, pi_y, pi, sample[1][supervised_indices], sample[2][supervised_indices],\
+                 sample[3][supervised_indices], k, n_classes, continuous_mask, weights)
             else:
                 loss_4 = 0
 
             if(sys.argv[6] =='l5'):
-                loss_5 = log_likelihood_loss(theta, pi_y, pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], k, n_classes, continuous_mask)
+                loss_5 = log_likelihood_loss(theta, pi_y, pi, sample[2][unsupervised_indices], \
+                    sample[3][unsupervised_indices], k, n_classes, continuous_mask, weights)
             else:
                 loss_5 =0
 
             if(sys.argv[7] =='l6'):
                 if(len(supervised_indices) >0):
                     supervised_indices = supervised_indices.tolist()
-                    probs_graphical = probability(theta, pi_y, pi, torch.cat([sample[2][unsupervised_indices], sample[2][supervised_indices]]),\
-                    torch.cat([sample[3][unsupervised_indices],sample[3][supervised_indices]]), k, n_classes, continuous_mask)
+                    probs_graphical = probability(theta, pi_y, pi, torch.cat([sample[2][unsupervised_indices], \
+                        sample[2][supervised_indices]]), torch.cat([sample[3][unsupervised_indices],\
+                        sample[3][supervised_indices]]), k, n_classes, continuous_mask, weights)
                 else:
-                    probs_graphical = probability(theta, pi_y, pi,sample[2][unsupervised_indices],sample[3][unsupervised_indices],\
-                         k, n_classes, continuous_mask)
+                    probs_graphical = probability(theta, pi_y, pi,sample[2][unsupervised_indices],\
+                        sample[3][unsupervised_indices],k, n_classes, continuous_mask, weights)
                 probs_graphical = (probs_graphical.t() / probs_graphical.sum(1)).t()
                 probs_lr = torch.nn.Softmax()(lr_model(sample[0]))
                 loss_6 = kl_divergence(probs_lr, probs_graphical)
@@ -322,10 +309,12 @@ for lo in range(0,num_runs):
                 optimizer_gm.step()
                 optimizer_lr.step()
 
-        y_pred = np.argmax(probability(theta, pi_y, pi, l_test, s_test, k, n_classes, continuous_mask).detach().numpy(), 1)
+        y_pred = np.argmax(probability(theta, pi_y, pi, l_test, s_test, k, n_classes, \
+            continuous_mask ,weights).detach().numpy(), 1)
         gm_acc = score(y_test, y_pred)
         #Valid
-        y_pred = np.argmax(probability(theta, pi_y, pi, l_valid, s_valid, k, n_classes, continuous_mask).detach().numpy(), 1)
+        y_pred = np.argmax(probability(theta, pi_y, pi, l_valid, s_valid, k, n_classes, \
+            continuous_mask, weights).detach().numpy(), 1)
         gm_valid_acc = score(y_valid, y_pred)
 
         #LR Test
@@ -396,7 +385,7 @@ for lo in range(0,num_runs):
             
 
 
-        if len(stop_pahle) > 10 and len(stop_pahle_gm) > 10 and (all(best_score_lr_val >= k for k in stop_pahle) or \
+        if len(stop_pahle) > 20 and len(stop_pahle_gm) > 20 and (all(best_score_lr_val >= k for k in stop_pahle) or \
         all(best_score_gm_val >= k for k in stop_pahle_gm)):
             print('Early Stopping at', best_epoch_gm, best_score_gm, best_score_lr)
             print('Validation score Early Stopping at', best_epoch_gm, best_score_lr_val, best_score_gm_val)
@@ -416,5 +405,7 @@ for lo in range(0,num_runs):
     final_score_lr_val.append(best_score_lr_val)
 
 
-print("Averaged scores are for GM,LR", np.mean(final_score_gm), np.mean(final_score_lr))
+print("Test - Averaged scores are for GM,LR", np.mean(final_score_gm), np.mean(final_score_lr))
 print("VALIDATION Averaged scores are for GM,LR", np.mean(final_score_gm_val), np.mean(final_score_lr_val))
+print("Test Standard deviation are for GM,LR", np.std(final_score_gm), np.std(final_score_lr))
+print("VALIDATION Standard deviation are for GM,LR", np.std(final_score_gm_val), np.std(final_score_lr_val))

@@ -5,7 +5,7 @@ from logistic_regression import *
 from deep_net import *
 import warnings
 warnings.filterwarnings("ignore")
-from cage import *
+# from cage import *
 from sklearn.feature_extraction.text import TfidfVectorizer
 from losses import *
 import pickle
@@ -35,6 +35,80 @@ if name_dset =='youtube' or name_dset=='census':
     from sklearn.metrics import accuracy_score as score
 else:
     from sklearn.metrics import f1_score as score
+
+from weighted_cage import *
+import higher
+import copy
+
+
+def rewt_lfs(sample, lr_model, theta, pi_y, pi, wts):
+    wts_param = torch.nn.Parameter(wts, requires_grad=True)
+    lr_model.register_parameter("wts", wts_param)
+    theta_param = torch.nn.Parameter(theta, requires_grad=True)
+    lr_model.register_parameter("theta", theta_param)
+    pi_y_param = torch.nn.Parameter(pi_y, requires_grad=True)
+    lr_model.register_parameter("pi_y", pi_y_param)
+    pi_param = torch.nn.Parameter(pi, requires_grad=True)
+    lr_model.register_parameter("pi", pi_param)
+    # print(lr_model.linear.weight)
+    if feat_model == 'lr':
+        optimizer = torch.optim.Adam([
+                {'params': lr_model.linear.weight},# linear_1.parameters()},
+                 # {'params': lr_model['params']['linear.bias']},
+                # {'params':lr_model.linear_2.parameters()},
+                # {'params':lr_model.out.parameters()},
+                {'params': [lr_model.theta, lr_model.pi, lr_model.pi_y], 'lr': 0.01, 'weight_decay':0}
+            ], lr=1e-4)
+    elif feat_model =='nn':
+        optimizer = torch.optim.Adam([
+                {'params': lr_model.linear_1.parameters()},
+                {'params':lr_model.linear_2.parameters()},
+                {'params':lr_model.out.parameters()},
+                {'params': [lr_model.theta, lr_model.pi, lr_model.pi_y], 'lr': 0.01, 'weight_decay':0}
+            ], lr=1e-4)
+    with higher.innerloop_ctx(lr_model, optimizer) as (fmodel, diffopt):
+        supervised_criterion = torch.nn.CrossEntropyLoss()
+        optimizer.zero_grad()
+        supervised_indices = sample[4].nonzero().view(-1)
+        unsupervised_indices = (1 - sample[4]).nonzero().squeeze()
+        if len(supervised_indices) > 0:
+            loss_1 = supervised_criterion(fmodel(sample[0][supervised_indices]), sample[1][supervised_indices])
+        else:
+            loss_1 = 0
+        unsupervised_lr_probability = torch.nn.Softmax(dim=1)(fmodel(sample[0][unsupervised_indices]))
+        loss_2 = entropy(unsupervised_lr_probability)
+        y_pred_unsupervised = np.argmax(
+            probability(fmodel.theta, fmodel.pi_y, fmodel.pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], k, n_classes,
+                        continuous_mask, fmodel.wts).detach().numpy(), 1)
+        loss_3 = supervised_criterion(fmodel(sample[0][unsupervised_indices]), torch.tensor(y_pred_unsupervised))
+        if len(supervised_indices) > 0:
+            loss_4 = log_likelihood_loss_supervised(fmodel.theta, fmodel.pi_y, fmodel.pi, sample[1][supervised_indices],
+                                                    sample[2][supervised_indices], sample[3][supervised_indices], k,
+                                                    n_classes,
+                                                    continuous_mask, fmodel.wts)
+        else:
+            loss_4 = 0
+        loss_5 = log_likelihood_loss(fmodel.theta, fmodel.pi_y, fmodel.pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices],
+                                     k, n_classes, continuous_mask, fmodel.wts)
+        prec_loss = precision_loss(fmodel.theta, k, n_classes, a, fmodel.wts)
+        probs_graphical = probability(fmodel.theta, fmodel.pi_y, fmodel.pi, sample[2], sample[3], k, n_classes, continuous_mask, fmodel.wts)
+        probs_graphical = (probs_graphical.t() / probs_graphical.sum(1)).t()
+        probs_lr = torch.nn.Softmax(dim=1)(fmodel(sample[0]))
+        loss_6 = kl_divergence(probs_graphical, probs_lr)
+        loss = loss_1 + loss_2 + loss_4 + loss_6 + loss_3 + loss_5 + prec_loss
+        diffopt.step(loss)
+        # print('x_valid.shape',x_valid.shape)
+        # print('y_valid.shape',y_valid.shape)
+        valid_loss = supervised_criterion(fmodel(x_valid), y_valid) #+ 1e-20 * torch.norm(list(fmodel.parameters(time=0))[0], p=1)
+        grad_all = torch.autograd.grad(valid_loss, list(fmodel.parameters(time=0))[0], only_inputs=True)[0]
+        if torch.norm(grad_all, p=2) != 0:
+            temp_wts = torch.clamp(wts-5*(grad_all/torch.norm(grad_all, p=2)), min=0, max=1)
+        else:
+            temp_wts = wts
+        return temp_wts
+
+
+
 
 
 if mode != '':
@@ -98,7 +172,7 @@ with open(fname, 'rb') as f:
         objs.append(o)
 
 x_valid = torch.tensor(objs[0]).double()
-y_valid = objs[3]
+y_valid = torch.tensor(objs[3]).long()
 l_valid = torch.tensor(objs[2]).long()
 s_valid = torch.tensor(objs[2]).double()
 
@@ -117,7 +191,7 @@ with open(fname, 'rb') as f:
             break
         objs1.append(o)
 x_test = torch.tensor(objs1[0]).double()
-y_test = objs1[3]
+y_test = torch.tensor(objs1[3]).long()
 l_test = torch.tensor(objs1[2]).long()
 s_test = torch.tensor(objs1[2]).double()
 
@@ -249,11 +323,24 @@ for lo in range(0,num_runs):
     print('num runs are ', sys.argv[1], num_runs)
     best_score_lr,best_score_gm,best_epoch_lr,best_epoch_gm,best_score_lr_val, best_score_gm_val = 0,0,0,0,0,0
     stop_pahle, stop_pahle_gm = [], []
+    # weights = torch.ones(k.shape[0])*(1/k.shape[0])
+    weights = torch.ones(k.shape[0])*0.5 
 
     for epoch in range(100):
         lr_model.train()
 
         for batch_ndx, sample in enumerate(loader):
+            if feat_model == 'lr':
+                lr_model1 = LogisticRegression(n_features, n_classes)
+            elif feat_model =='nn':
+                n_hidden = 512
+                lr_model1 = DeepNet(n_features, n_hidden, n_classes)
+            # lr_model1 = DeepNet(n_features, n_hidden, n_classes)
+            lr_model1.load_state_dict(copy.deepcopy(lr_model.state_dict()))
+            theta1 = copy.deepcopy(theta)
+            pi_y1 = copy.deepcopy(pi_y)
+            pi1 = copy.deepcopy(pi)
+            weights = rewt_lfs(sample, lr_model1, theta1, pi_y1, pi1, weights)
             optimizer_lr.zero_grad()
             optimizer_gm.zero_grad()
 
@@ -279,18 +366,23 @@ for lo in range(0,num_runs):
                 loss_2=0
             if(sys.argv[4] =='l3'):
                 # print(theta)
-                y_pred_unsupervised = np.argmax(probability(theta, pi_y, pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], k, n_classes,continuous_mask).detach().numpy(), 1)
-                loss_3 = supervised_criterion(lr_model(sample[0][unsupervised_indices]), torch.tensor(y_pred_unsupervised))
+                y_pred_unsupervised = np.argmax(probability(theta, pi_y, pi, sample[2][unsupervised_indices],\
+                 sample[3][unsupervised_indices], k, n_classes,continuous_mask, weights).detach().numpy(), 1)
+                loss_3 = supervised_criterion(lr_model(sample[0][unsupervised_indices]),\
+                 torch.tensor(y_pred_unsupervised))
             else:
                 loss_3 = 0
 
             if (sys.argv[5] == 'l4' and len(supervised_indices) > 0):
-                loss_4 = log_likelihood_loss_supervised(theta, pi_y, pi, sample[1][supervised_indices], sample[2][supervised_indices], sample[3][supervised_indices], k, n_classes, continuous_mask)
+                loss_4 = log_likelihood_loss_supervised(theta, pi_y, pi, sample[1][supervised_indices], \
+                    sample[2][supervised_indices], sample[3][supervised_indices],\
+                     k, n_classes, continuous_mask, weights)
             else:
                 loss_4 = 0
 
             if(sys.argv[6] =='l5'):
-                loss_5 = log_likelihood_loss(theta, pi_y, pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], k, n_classes, continuous_mask)
+                loss_5 = log_likelihood_loss(theta, pi_y, pi, sample[2][unsupervised_indices], \
+                    sample[3][unsupervised_indices], k, n_classes, continuous_mask, weights)
             else:
                 loss_5 =0
 
@@ -298,10 +390,10 @@ for lo in range(0,num_runs):
                 if(len(supervised_indices) >0):
                     supervised_indices = supervised_indices.tolist()
                     probs_graphical = probability(theta, pi_y, pi, torch.cat([sample[2][unsupervised_indices], sample[2][supervised_indices]]),\
-                    torch.cat([sample[3][unsupervised_indices],sample[3][supervised_indices]]), k, n_classes, continuous_mask)
+                    torch.cat([sample[3][unsupervised_indices],sample[3][supervised_indices]]), k, n_classes, continuous_mask, weights)
                 else:
                     probs_graphical = probability(theta, pi_y, pi,sample[2][unsupervised_indices],sample[3][unsupervised_indices],\
-                         k, n_classes, continuous_mask)
+                         k, n_classes, continuous_mask, weights)
                 probs_graphical = (probs_graphical.t() / probs_graphical.sum(1)).t()
                 probs_lr = torch.nn.Softmax()(lr_model(sample[0]))
                 loss_6 = kl_divergence(probs_lr, probs_graphical)
@@ -311,7 +403,7 @@ for lo in range(0,num_runs):
                 loss_6= 0
             # loss_6 = - torch.log(1 - probs_graphical * (1 - probs_lr)).sum(1).mean()
             if(sys.argv[8] =='qg'):
-                prec_loss = precision_loss(theta, k, n_classes, a)
+                prec_loss = precision_loss(theta, k, n_classes, a, weights)
             else:
                 prec_loss =0
 
@@ -322,10 +414,10 @@ for lo in range(0,num_runs):
                 optimizer_gm.step()
                 optimizer_lr.step()
 
-        y_pred = np.argmax(probability(theta, pi_y, pi, l_test, s_test, k, n_classes, continuous_mask).detach().numpy(), 1)
+        y_pred = np.argmax(probability(theta, pi_y, pi, l_test, s_test, k, n_classes, continuous_mask, weights).detach().numpy(), 1)
         gm_acc = score(y_test, y_pred)
         #Valid
-        y_pred = np.argmax(probability(theta, pi_y, pi, l_valid, s_valid, k, n_classes, continuous_mask).detach().numpy(), 1)
+        y_pred = np.argmax(probability(theta, pi_y, pi, l_valid, s_valid, k, n_classes, continuous_mask, weights).detach().numpy(), 1)
         gm_valid_acc = score(y_valid, y_pred)
 
         #LR Test

@@ -23,7 +23,17 @@ def probability_l_y(theta, l, k, n_classes):
     probability = torch.zeros((l.shape[0], n_classes))
     z = calculate_normalizer(theta, k, n_classes)
     for y in range(n_classes):
-        probability[:, y] = torch.exp(phi(theta[y], l).sum(1)) / z
+        # print('l.shape ', l.shape)
+
+        yo = phi(theta[y], l)
+        # print('yo.shape', yo.shape)
+        # print(yo.shape[0])
+        # try:
+        yoo = torch.exp(yo.sum(1))
+        # except:
+            # print('inside except cage #32')
+        # yoo = torch.exp(yo.sum())
+        probability[:, y] =  yoo/ z
 
     return probability.double()
 
