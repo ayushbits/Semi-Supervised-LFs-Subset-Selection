@@ -1,3 +1,5 @@
+
+### Refer to [SPEAR Library](http://github.com/decile-team/spear)  for well documented implemenation of this paper.
 # Requirements
 This code has been developed with
   - python 3.6
