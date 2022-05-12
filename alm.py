@@ -11,8 +11,11 @@ from cage import *
 from sklearn.feature_extraction.text import TfidfVectorizer
 from losses import *
 import pickle
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import TensorDataset, DataLoader,Dataset 
 import torch.nn.functional as F
+
+from LearnMultiLambdaMeta import LearnMultiLambdaMeta
+import copy 
 
 Temp = 4 
 use_cuda = torch.cuda.is_available()
@@ -35,7 +38,21 @@ print('dset is ', name_dset)
 mode = sys.argv[17] #''
 metric = sys.argv[18]
 
+lam_learn = True
 
+class MyDataset(Dataset):
+    def __init__(self,dataset):
+        self.dataset = dataset
+
+    def __getitem__(self, index):
+        sample = self.dataset[index]
+
+        # Your transformations here (or set it in CIFAR10)
+
+        return sample, index
+
+    def __len__(self):
+        return len(self.dataset)
 
 from sklearn.metrics import precision_score as prec_score
 from sklearn.metrics import recall_score as recall_score
@@ -250,6 +267,8 @@ for lo in range(0,num_runs):
     dataset = TensorDataset(x_train, y_train, l, s, supervised_mask, lambdas)
 
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=True,pin_memory=True)
+    loader_ind = DataLoader(MyDataset(dataset), batch_size=batch_size, shuffle=True,pin_memory=True)
+    
     # loading initial teacher_model 1 here
     for epoch in range(3):
         teacher_lr_model.train()
@@ -294,6 +313,11 @@ for lo in range(0,num_runs):
     gm_recall = recall_score(y_test, y_pred, average=None)
     print("Teacher Model 2 (GM) Test accuracy Epoch: {}\tTest LR accuracy_score: {}".format(epoch, gm_acc))
 
+
+    if lam_learn: 
+        lelam = LearnMultiLambdaMeta(loader_ind, x_valid,y_valid, copy.deepcopy(lr_model), n_classes, len(y_train), \
+                supervised_criterion_nored, "cuda", 2,teacher_lr_model,theta, pi_y, pi,k,continuous_mask,\
+                     supervised_criterion, Temp)
 
     # Again initializing lr and gm parameters here
     best_score_lr,best_score_gm,best_epoch_lr,best_epoch_gm,best_score_lr_val, best_score_gm_val = 0,0,0,0,0,0
@@ -348,7 +372,7 @@ for lo in range(0,num_runs):
     
             
             probs_theta_kl = F.log_softmax(lr_outputs / Temp, dim =1)
-            probs_lr_teacher = F.log_softmax(teacher_lr_model(sample[0][unsupervised_indices])/Temp, dim=1)
+            probs_lr_teacher = F.softmax(teacher_lr_model(sample[0][unsupervised_indices])/Temp, dim=1)
             loss_KD = torch.nn.KLDivLoss(reduction='none')(probs_theta_kl, probs_lr_teacher)
             
             loss_KD =  Temp * Temp *sample[5][unsupervised_indices][:,1]*torch.sum(loss_KD, dim=1)
@@ -357,6 +381,19 @@ for lo in range(0,num_runs):
             loss.backward()
             # optimizer_gm.step()
             optimizer_lr.step()
+
+        if lam_learn:
+
+            cached_state_dictT = copy.deepcopy(lr_model.state_dict())
+            clone_dict = copy.deepcopy(lr_model.state_dict())
+            lelam.update_model(clone_dict)
+            lr_model.load_state_dict(cached_state_dictT)
+
+            lambdas = lelam.get_lambdas(optimizer_lr.param_groups[0]['lr'],i,lambdas)
+            
+            for m in range(2):
+                print(lambdas[:,m].max(), lambdas[:,m].min(), torch.median(lambdas[:,m]),\
+                        torch.quantile(lambdas[:,m], 0.75),torch.quantile(lambdas[:,m], 0.25))
             
 #        wname = "Run_"+str(lo)+" Train Loss" #wandb
 #        wandb.log({wname:loss, 'custom_step':epoch}) #wandb
