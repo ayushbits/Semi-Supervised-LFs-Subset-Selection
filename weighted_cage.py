@@ -1,6 +1,6 @@
 import torch
 from torch.distributions.beta import Beta
-
+import math
 
 def probability_y(pi_y):
     pi = torch.exp(pi_y)
@@ -59,6 +59,7 @@ def log_likelihood_loss_supervised(theta, pi_y, pi, y, l, s, k, n_classes, conti
     eps = 1e-8
     prob = probability(theta, pi_y, pi, l, s, k, n_classes, continuous_mask, weights)
     prob = (prob.t() / prob.sum(1)).t()
+    # print('prob ka shape', prob.shape)
     return torch.nn.NLLLoss()(torch.log(prob), y)
     # return - torch.log(probability(theta, pi_y, pi, l, s, k, n_classes, continuous_mask)[:, y] + eps).mean()# / s.shape[0]
 
@@ -76,5 +77,19 @@ def precision_loss(theta, k, n_classes, a, weights):
     correct_prob = torch.zeros(n_lfs)
     for i in range(n_lfs):
         correct_prob[i] = prob[i, k[i]]
-    loss = a * torch.log(correct_prob).double() + (1 - a) * torch.log(1 - correct_prob).double()
+    loss = (1/math.exp(1)) * (a * torch.exp(weights) * torch.log(correct_prob).double() + (1 - a) *  torch.exp(weights) * torch.log(1 - correct_prob).double())
     return -loss.sum()
+    # n_lfs = k.shape[0]
+    # prob = torch.ones(n_lfs, n_classes).double()
+    # z_per_lf = 0
+    # for y in range(n_classes):
+    #     m_y = torch.exp(phi(theta[y] * weights, torch.ones(n_lfs)))
+    #     per_lf_matrix = torch.tensordot((1 + m_y).view(-1, 1), torch.ones(m_y.shape).double().view(1, -1), 1) - torch.eye(n_lfs).double()
+    #     prob[:, y] = per_lf_matrix.prod(0).double()
+    #     z_per_lf += prob[:, y].double()
+    # prob /= z_per_lf.view(-1, 1)
+    # correct_prob = torch.zeros(n_lfs)
+    # for i in range(n_lfs):
+    #     correct_prob[i] = prob[i, k[i]]
+    # loss = a * torch.log(correct_prob).double() + (1 - a) * torch.log(1 - correct_prob).double()
+    # return -loss.sum()

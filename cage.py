@@ -8,7 +8,9 @@ def probability_y(pi_y):
 
 
 def phi(theta, l):
-    return theta * torch.abs(l).double()
+    value = theta * torch.abs(l).double()
+    #print(value)
+    return value
 
 
 def calculate_normalizer(theta, k, n_classes):
@@ -26,10 +28,13 @@ def probability_l_y(theta, l, k, n_classes):
         # print('l.shape ', l.shape)
 
         yo = phi(theta[y], l)
-        # print('yo.shape', yo.shape)
+       # print('yo.shape', yo.shape)
         # print(yo.shape[0])
         # try:
+        #yo = yo.view(-1, l.shape[0])
+        
         yoo = torch.exp(yo.sum(1))
+
         # except:
             # print('inside except cage #32')
         # yoo = torch.exp(yo.sum())
