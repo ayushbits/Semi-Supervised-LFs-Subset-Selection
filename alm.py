@@ -377,7 +377,7 @@ for lo in range(0,num_runs):
             
             loss_KD =  Temp * Temp *sample[5][unsupervised_indices][:,1]*torch.sum(loss_KD, dim=1)
             loss += (loss_SL + loss_KD).mean()
-            print('loss is ', loss, )
+            # print('loss is ', loss )
             loss.backward()
             # optimizer_gm.step()
             optimizer_lr.step()
