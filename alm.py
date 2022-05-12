@@ -47,8 +47,6 @@ class MyDataset(Dataset):
     def __getitem__(self, index):
         sample = self.dataset[index]
 
-        # Your transformations here (or set it in CIFAR10)
-
         return sample, index
 
     def __len__(self):
@@ -316,7 +314,7 @@ for lo in range(0,num_runs):
 
     if lam_learn: 
         lelam = LearnMultiLambdaMeta(loader_ind, x_valid,y_valid, copy.deepcopy(lr_model), n_classes, len(y_train), \
-                supervised_criterion_nored, "cuda", 2,teacher_lr_model,theta, pi_y, pi,k,continuous_mask,\
+                supervised_criterion_nored, "cpu", 2,teacher_lr_model,theta, pi_y, pi,k,continuous_mask,\
                      supervised_criterion, Temp)
 
     # Again initializing lr and gm parameters here
@@ -377,7 +375,7 @@ for lo in range(0,num_runs):
             
             loss_KD =  Temp * Temp *sample[5][unsupervised_indices][:,1]*torch.sum(loss_KD, dim=1)
             loss += (loss_SL + loss_KD).mean()
-            print('loss is ', loss, )
+            #print('loss is ', loss, )
             loss.backward()
             # optimizer_gm.step()
             optimizer_lr.step()
@@ -394,6 +392,10 @@ for lo in range(0,num_runs):
             for m in range(2):
                 print(lambdas[:,m].max(), lambdas[:,m].min(), torch.median(lambdas[:,m]),\
                         torch.quantile(lambdas[:,m], 0.75),torch.quantile(lambdas[:,m], 0.25))
+
+            dataset = TensorDataset(x_train, y_train, l, s, supervised_mask, lambdas)
+
+            loader = DataLoader(dataset, batch_size=batch_size, shuffle=True,pin_memory=True)
             
 #        wname = "Run_"+str(lo)+" Train Loss" #wandb
 #        wandb.log({wname:loss, 'custom_step':epoch}) #wandb

@@ -29,14 +29,14 @@ class LearnMultiLambdaMeta(object):
         """
         Constructer method
         """
-        self.trainloader = trainloader  # assume its a sequential loader.
-        self.val_x = val_x
-        self.val_y = val_y
-        self.model = model
-        self.N_trn = N_trn
-
         self.num_classes = num_classes
         self.device = device
+        
+        self.trainloader = trainloader  # assume its a sequential loader.
+        self.val_x = torch.tensor(val_x).to(self.device)
+        self.val_y = torch.tensor(val_y).to(self.device)
+        self.model = model
+        self.N_trn = N_trn
 
         self.fit = fit
 
@@ -71,50 +71,42 @@ class LearnMultiLambdaMeta(object):
         self.teacher_model.train()
 
         with torch.no_grad():
-            val_loss = 0
-            val_total = 0
-            for batch_idx, (inputs, targets) in enumerate(self.valloader):
-                # print(batch_idx)
-                inputs, targets = inputs.to(self.device), targets.to(self.device)
-                outputs = self.model(inputs)
-                loss = self.criterion_red(outputs, targets)
-                val_loss += targets.size(0)*loss.item()
-                val_total += targets.size(0)
-                print(val_loss/val_total,end=",")
+
+            outputs = self.model(self.val_x)
+            loss = self.criterion_red(outputs, self.val_y)
+            print(loss.item()/self.val_y.shape[0],end=",")
         print()
         
         max_value = 2
         
-        for batch_idx, sample,indices in enumerate(self.trainloader):
+        for batch_idx, (sample,indices) in enumerate(self.trainloader):
 
             unsupervised_indices = (1-sample[4]).nonzero().squeeze().view(-1)
            
             # Theta Model
-            lr_outputs = self.model(sample[0][unsupervised_indices],last=True, freeze=True)
+            lr_outputs,l1 = self.model(sample[0][unsupervised_indices],last=True, freeze=True)
 
-            probs_theta = F.log_softmax(lr_outputs)
-            outputs = np.argmax(probs_theta.detach().numpy(), 1)
+            #probs_theta = F.log_softmax(lr_outputs)
+            #outputs = np.argmax(probs_theta.detach().numpy(), 1)
             
             # GM Model Test
             probs_graphical =(probability(self.theta, self.pi_y, self.pi,sample[2][unsupervised_indices],\
                 sample[3][unsupervised_indices],self.k, self.num_classes, self.continuous_mask))
             targets = (probs_graphical.t() / probs_graphical.sum(1)).t()
-            outputs_tensor = torch.Tensor(outputs)
+            #outputs_tensor = torch.Tensor(outputs)
             targets_tensor = torch.Tensor(targets)
 
             loss_SL = self.criterion_red(lr_outputs, targets_tensor)
             
-            l0_grads = (torch.autograd.grad(loss_SL, outputs)[0]).detach().clone().to(self.device)
+            l0_grads = (torch.autograd.grad(loss_SL, lr_outputs)[0]).detach().clone().to(self.device)
             l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
             l1_grads = l0_expand * l1.detach().repeat(1, self.num_classes).to(self.device)
 
-            probs_theta_kl = F.log_softmax(lr_outputs / self.Temp, dim =1)
-            probs_lr_teacher = F.softmax(self.teacher_model(sample[0][unsupervised_indices])/self.Temp, dim=1)
-            loss_KD = torch.nn.KLDivLoss(reduction='none')(probs_theta_kl, probs_lr_teacher)
-            
-            loss_KD =  self.Temp * self.Temp *sample[5][unsupervised_indices][:,1]*torch.sum(loss_KD, dim=1)
+            probs_theta_kl = F.log_softmax(lr_outputs / self.temp, dim =1)
+            probs_lr_teacher = F.softmax(self.teacher_model(sample[0][unsupervised_indices])/self.temp, dim=1)
+            loss_KD = self.temp * self.temp *torch.nn.KLDivLoss(reduction='batchmean')(probs_theta_kl, probs_lr_teacher)
 
-            l0_grads_KD = (torch.autograd.grad(loss_KD, outputs)[0]).detach().clone().to(self.device)
+            l0_grads_KD = (torch.autograd.grad(loss_KD, lr_outputs)[0]).detach().clone().to(self.device)
             l0_expand_KD = torch.repeat_interleave(l0_grads_KD, l1.shape[1], dim=1)
             l1_grads_KD = l0_expand_KD * l1.detach().repeat(1, self.num_classes).to(self.device)
             
@@ -122,11 +114,11 @@ class LearnMultiLambdaMeta(object):
             if batch_idx % self.fit == 0:
                 SL_grads = torch.cat((l0_grads, l1_grads), dim=1)
                 KD_grads = torch.cat((l0_grads_KD, l1_grads_KD), dim=1)
-                batch_ind = list(indices) 
+                batch_ind = list(indices[unsupervised_indices]) 
             else:
                 SL_grads = torch.cat((SL_grads, torch.cat((l0_grads, l1_grads), dim=1)), dim=0)
                 KD_grads = torch.cat((KD_grads, torch.cat((l0_grads_KD, l1_grads_KD), dim=1)), dim=0)
-                batch_ind.extend(list(indices))
+                batch_ind.extend(list(indices[unsupervised_indices]))
           
             if (batch_idx + 1) % self.fit == 0 or batch_idx + 1 == len(self.trainloader):
 
@@ -141,9 +133,10 @@ class LearnMultiLambdaMeta(object):
                     lambdas = lam.clone().to(self.device)#, device=self.device)
                     lambdas.requires_grad = True
                     
-
                     lambdas1 = lambdas[batch_ind,0][:,None]
                     lambdas_2 = lambdas[batch_ind,1][:,None]
+
+                    #print(lambdas1.shape,lambdas_2.shape,SL_grads.shape,KD_grads.shape)
                     comb_grad_all = lambdas1*SL_grads + lambdas_2*KD_grads
 
                     comb_grad = comb_grad_all.sum(0)
@@ -158,10 +151,10 @@ class LearnMultiLambdaMeta(object):
                     loss_SL_val = self.criterion_red(out_vec_val, self.val_y.to(self.device))
 
                     alpha_grads =  (torch.autograd.grad(loss_SL_val, lambdas1,retain_graph=True)[0]).detach().clone().to(self.device)  
-                    lam[batch_ind,0] = lam[batch_ind,0] - 100*alpha_grads.view(-1)
+                    lam[batch_ind,0] = lam[batch_ind,0] - 1000*alpha_grads.view(-1)
 
                     alpha_grads =  (torch.autograd.grad(loss_SL_val, lambdas_2)[0]).detach().clone().to(self.device) 
-                    lam[batch_ind,1] = lam[batch_ind,1] - 100*alpha_grads.view(-1)
+                    lam[batch_ind,1] = lam[batch_ind,1] - 1000*alpha_grads.view(-1)
 
                     if (batch_idx + 1) % (self.fit*10) ==0:
                         if r ==0:
