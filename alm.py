@@ -390,9 +390,9 @@ for lo in range(0,num_runs):
 
             lambdas = lelam.get_lambdas(optimizer_lr.param_groups[0]['lr'],i,lambdas)
             
-            # for m in range(2):
-                # print(lambdas[:,m].max(), lambdas[:,m].min(), torch.median(lambdas[:,m]),\
-                #         torch.quantile(lambdas[:,m], 0.75),torch.quantile(lambdas[:,m], 0.25))
+            for m in range(2):
+                print(lambdas[:,m].max(), lambdas[:,m].min(), torch.median(lambdas[:,m]),\
+                        torch.quantile(lambdas[:,m], 0.75),torch.quantile(lambdas[:,m], 0.25))
 
             dataset = TensorDataset(x_train, y_train, l, s, supervised_mask, lambdas)
 
