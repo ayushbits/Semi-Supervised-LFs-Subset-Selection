@@ -266,9 +266,8 @@ for lo in range(0,num_runs):
 
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=True,pin_memory=True)
     loader_ind = DataLoader(MyDataset(dataset), batch_size=batch_size, shuffle=True,pin_memory=True)
-    
     # loading initial teacher_model 1 here
-    for epoch in range(3):
+    for epoch in range(10):
         teacher_lr_model.train()
         for batch_ndx, sample in enumerate(loader):
             optimizer_lr.zero_grad()
@@ -276,20 +275,28 @@ for lo in range(0,num_runs):
             supervised_indices = sample[4].nonzero().view(-1)
             if len(supervised_indices) > 0:
                 loss_1 = supervised_criterion(lr_model(sample[0][supervised_indices]), sample[1][supervised_indices])
-                loss_1.backward( retain_graph=True)                
+                loss_1.backward()                
                 teacher_optimizer_lr.step()
     # Finished teacher model 1 here -----------------
 
     # Training teacher Model 2 (GM) here ----
-    for epoch in range (3):
-        teacher_lr_model.train()
+    for epoch in range (40):
+        optimizer_gm.zero_grad()
         for batch_ndx, sample in enumerate(loader):
-            optimizer_lr.zero_grad()
+            optimizer_gm.zero_grad()
             sup = []
             supervised_indices = sample[4].nonzero().view(-1)
             unsupervised_indices = (1-sample[4]).nonzero().squeeze().view(-1)
             loss_GM = log_likelihood_loss(theta, pi_y, pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], k, n_classes, continuous_mask)
+            prec_loss = precision_loss(theta, k, n_classes, a)
+            loss = loss_GM + prec_loss
+            loss.backward()
+            optimizer_gm.step()
+        print('Loss GM ', loss_GM.item())
+        y_pred = np.argmax(probability(theta, pi_y, pi, l_test, s_test, k, n_classes, continuous_mask).detach().numpy(), 1)
+        gm_acc = score(y_test, y_pred)
         
+        print("Teacher Model 2 (GM) Test accuracy Epoch: {}\tTest GM accuracy_score: {}".format(epoch, gm_acc))
     # Finished training Teacher model 2 here ---------
 
     # Testing teacher model 1 here 
@@ -305,16 +312,11 @@ for lo in range(0,num_runs):
     print("Teacher Model 1 Test accuracy Epoch: {}\tTest LR accuracy_score: {}".format(epoch, lr_acc))
 
     # Testing teacher model 2 here 
-    y_pred = np.argmax(probability(theta, pi_y, pi, l_test, s_test, k, n_classes, continuous_mask).detach().numpy(), 1)
-    gm_acc = score(y_test, y_pred)
-    gm_prec = prec_score(y_test, y_pred, average=None)
-    gm_recall = recall_score(y_test, y_pred, average=None)
-    print("Teacher Model 2 (GM) Test accuracy Epoch: {}\tTest LR accuracy_score: {}".format(epoch, gm_acc))
+    
 
 
     if lam_learn: 
-        lelam = LearnMultiLambdaMeta(loader_ind, x_valid,y_valid, copy.deepcopy(lr_model), n_classes, len(y_train), \
-                supervised_criterion_nored, "cpu", 2,teacher_lr_model,theta, pi_y, pi,k,continuous_mask,\
+        lelam = LearnMultiLambdaMeta(loader_ind, x_valid,y_valid, copy.deepcopy(lr_model), n_classes, len(y_train), supervised_criterion_nored, "cpu", 2,teacher_lr_model,theta, pi_y, pi,k,continuous_mask,\
                      supervised_criterion, Temp)
 
     # Again initializing lr and gm parameters here
@@ -335,9 +337,14 @@ for lo in range(0,num_runs):
             supervised_indices = sample[4].nonzero().view(-1)
             # unsupervised_indices = indices  ## Uncomment for entropy
             unsupervised_indices = (1-sample[4]).nonzero().squeeze().view(-1)
-            # print('sample[2][unsupervised_indices].shape', sample[2][unsupervised_indices].shape)
-            # print('sample[3][unsupervised_indices].shape', sample[3][unsupervised_indices].shape)
+            # Case I - CE for theta model
+            if len(supervised_indices) > 0:
+                loss = supervised_criterion(lr_model(sample[0][supervised_indices]), sample[1][supervised_indices])
+            else:
+                loss = 0
+            
 
+            # Case II - Component 1
             # Theta Model
             lr_outputs = (lr_model(sample[0][unsupervised_indices]))
 
@@ -350,36 +357,28 @@ for lo in range(0,num_runs):
             targets = (probs_graphical.t() / probs_graphical.sum(1)).t()
             outputs_tensor = torch.Tensor(outputs)
             targets_tensor = torch.Tensor(targets)
-            # print('outputs ', outputs_tensor.shape)
-            # print('targets ', targets_tensor.shape)
-
-            # Case I - CE for theta model
-            if len(supervised_indices) > 0:
-                loss = supervised_criterion(lr_model(sample[0][supervised_indices]), sample[1][supervised_indices])
-            else:
-                loss = 0
-            # print('Loss Case I ', loss)
-
-            # Case II - Component 1
+            
+            
             loss_SL = supervised_criterion_nored(lr_outputs, targets_tensor)
             # print('loss_SL ', loss_SL.shape)
             # print('sample[5][unsupervised_indices][:,0]', sample[5][unsupervised_indices][:,0])
             loss_SL = sample[5][unsupervised_indices][:,0]*loss_SL # sample[5] are lambdas
 
-            # loss_GM = log_likelihood_loss(theta, pi_y, pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], k, n_classes, continuous_mask) # 2nd teacher model, bahar train hoga
-    
+            #Case II, component 2
             
             probs_theta_kl = F.log_softmax(lr_outputs / Temp, dim =1)
             probs_lr_teacher = F.softmax(teacher_lr_model(sample[0][unsupervised_indices])/Temp, dim=1)
             loss_KD = torch.nn.KLDivLoss(reduction='none')(probs_theta_kl, probs_lr_teacher)
             
             loss_KD =  Temp * Temp *sample[5][unsupervised_indices][:,1]*torch.sum(loss_KD, dim=1)
-            loss += (loss_SL + loss_KD).mean()
-            # print('loss is ', loss )
-            loss.backward()
-            # optimizer_gm.step()
-            optimizer_lr.step()
+            loss *= len(supervised_indices)
+            loss_case2 = (loss_SL + loss_KD).mean()*len(unsupervised_indices)
 
+            loss = (loss + loss_case2)/(len(supervised_indices )  + len(unsupervised_indices))
+
+            loss.backward()
+            optimizer_lr.step()
+        print('Epoch ', epoch, ' loss is ',  loss.item() )
         if lam_learn:
 
             cached_state_dictT = copy.deepcopy(lr_model.state_dict())
@@ -389,9 +388,9 @@ for lo in range(0,num_runs):
 
             lambdas = lelam.get_lambdas(optimizer_lr.param_groups[0]['lr'],i,lambdas)
             
-            for m in range(2):
-                print(lambdas[:,m].max(), lambdas[:,m].min(), torch.median(lambdas[:,m]),\
-                        torch.quantile(lambdas[:,m], 0.75),torch.quantile(lambdas[:,m], 0.25))
+            # for m in range(2):
+                # print(lambdas[:,m].max(), lambdas[:,m].min(), torch.median(lambdas[:,m]),\
+                #         torch.quantile(lambdas[:,m], 0.75),torch.quantile(lambdas[:,m], 0.25))
 
             dataset = TensorDataset(x_train, y_train, l, s, supervised_mask, lambdas)
 
@@ -420,15 +419,15 @@ for lo in range(0,num_runs):
 
 #         #LR Test
 
-#         probs = torch.nn.Softmax()(lr_model(x_test))
-#         y_pred = np.argmax(probs.detach().numpy(), 1)
+        probs = torch.nn.Softmax()(lr_model(x_test))
+        y_pred = np.argmax(probs.detach().numpy(), 1)
 #         # if name_dset =='youtube' or name_dset=='census' or name_dset =='sms':
-#         if metric=='accuracy':
-#         	# print('inside accuracy LR test')
-#         	lr_acc =score(y_test, y_pred)
-#         	lr_prec = prec_score(y_test, y_pred, average=None)
-#         	lr_recall = recall_score(y_test, y_pred, average=None)
-#         	gm_prec, gm_recall = 0,0
+        if metric=='accuracy':
+        	# print('inside accuracy LR test')
+        	lr_acc =score(y_test, y_pred)
+        	lr_prec = prec_score(y_test, y_pred, average=None)
+        	lr_recall = recall_score(y_test, y_pred, average=None)
+        print('Epoch ', epoch,  ' Test accuracy is ', lr_acc)
 
     
 #         else:

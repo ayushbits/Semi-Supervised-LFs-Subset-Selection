@@ -74,8 +74,8 @@ class LearnMultiLambdaMeta(object):
 
             outputs = self.model(self.val_x)
             loss = self.criterion_red(outputs, self.val_y)
-            print(loss.item(),end=",")
-        print()
+            # print(loss.item(),end=",")
+        # print()
         
         max_value = 2
         
@@ -151,15 +151,15 @@ class LearnMultiLambdaMeta(object):
                     loss_SL_val = self.criterion_red(out_vec_val, self.val_y.to(self.device))
 
                     alpha_grads =  (torch.autograd.grad(loss_SL_val, lambdas1,retain_graph=True)[0]).detach().clone().to(self.device)  
-                    lam[batch_ind,0] = lam[batch_ind,0] - 600*alpha_grads.view(-1)
+                    lam[batch_ind,0] = lam[batch_ind,0] - 100*alpha_grads.view(-1)
 
                     alpha_grads =  (torch.autograd.grad(loss_SL_val, lambdas_2)[0]).detach().clone().to(self.device) 
-                    lam[batch_ind,1] = lam[batch_ind,1] - 600*alpha_grads.view(-1)
+                    lam[batch_ind,1] = lam[batch_ind,1] - 100*alpha_grads.view(-1)
 
-                    if (batch_idx + 1) % (self.fit*10) ==0:
-                        if r ==0:
-                            print(round(self.criterion_red(self.init_out, self.val_y.to(self.device)).item(),4))
-                        print(alpha_grads[0],round(loss_SL_val.item(),4),end=",")#"+",round(loss_KD_trn.item(),4), )
+                    # if (batch_idx + 1) % (self.fit*10) ==0:
+                        # if r ==0:
+                        #     print(round(self.criterion_red(self.init_out, self.val_y.to(self.device)).item(),4))
+                        # print(alpha_grads[0],round(loss_SL_val.item(),4),end=",")#"+",round(loss_KD_trn.item(),4), )
                         #print(self.init_out[r][self.y_val[r]],out_vec_val[r][self.y_val[r]])
                         #print(alpha_grads[:3])
                     del out_vec_val

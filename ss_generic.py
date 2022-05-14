@@ -388,8 +388,8 @@ for lo in range(0,num_runs):
             gm_prec, gm_recall = 0,0
         else:
             lr_valid_acc = score(y_valid, y_pred, average=metric_avg)
-        # print("Epoch: {}\t Test GM accuracy_score: {}".format(epoch, gm_acc ))
-#         print("Epoch: {}\tGM accuracy_score(Valid): {}".format(epoch, gm_valid_acc))
+        print("Epoch: {}\t Test GM accuracy_score: {}".format(epoch, gm_acc ))
+        print("Epoch: {}\tGM accuracy_score(Valid): {}".format(epoch, gm_valid_acc))
         # print("Epoch: {}\tTest LR accuracy_score: {}".format(epoch, lr_acc))    
 #         print("Epoch: {}\tLR accuracy_score(Valid): {}".format(epoch, lr_valid_acc))
         wname = "Run_"+str(lo)+" LR valid score"
