@@ -252,10 +252,11 @@ for lo in range(0,num_runs):
 
 
     # optimizer = torch.optim.Adam([{"params": lr_model.parameters()}, {"params": [pi, pi_y, theta]}], lr=0.001)
-    teacher_optimizer_lr = torch.optim.Adam(lr_model.parameters(), lr=lr_fnetwork) #theta'
+    teacher_optimizer_lr = torch.optim.Adam(teacher_lr_model.parameters(), lr=lr_fnetwork) #theta'
     optimizer_lr = torch.optim.Adam(lr_model.parameters(), lr=lr_fnetwork) # theta
     optimizer_gm = torch.optim.Adam([theta, pi, pi_y], lr=lr_gm, weight_decay=0)
     # optimizer = torch.optim.Adam([theta, pi, pi_y], lr=0.01, weight_decay=0)
+
     supervised_criterion = torch.nn.CrossEntropyLoss()
     supervised_criterion_nored = torch.nn.CrossEntropyLoss(reduction='none')
 
@@ -274,7 +275,7 @@ for lo in range(0,num_runs):
             sup = []
             supervised_indices = sample[4].nonzero().view(-1)
             if len(supervised_indices) > 0:
-                loss_1 = supervised_criterion(lr_model(sample[0][supervised_indices]), sample[1][supervised_indices])
+                loss_1 = supervised_criterion(teacher_lr_model(sample[0][supervised_indices]), sample[1][supervised_indices])
                 loss_1.backward()                
                 teacher_optimizer_lr.step()
     # Finished teacher model 1 here -----------------
@@ -316,8 +317,9 @@ for lo in range(0,num_runs):
 
 
     if lam_learn: 
-        lelam = LearnMultiLambdaMeta(loader_ind, x_valid,y_valid, copy.deepcopy(lr_model), n_classes, len(y_train), supervised_criterion_nored, "cpu", 2,teacher_lr_model,theta, pi_y, pi,k,continuous_mask,\
-                     supervised_criterion, Temp)
+        lelam = LearnMultiLambdaMeta(loader_ind, x_valid,y_valid, copy.deepcopy(lr_model), n_classes, len(y_train), \
+            supervised_criterion_nored, "cpu", 2,teacher_lr_model,theta, pi_y, pi,k,continuous_mask,\
+                supervised_criterion, Temp)
 
     # Again initializing lr and gm parameters here
     best_score_lr,best_score_gm,best_epoch_lr,best_epoch_gm,best_score_lr_val, best_score_gm_val = 0,0,0,0,0,0
@@ -423,10 +425,10 @@ for lo in range(0,num_runs):
         y_pred = np.argmax(probs.detach().numpy(), 1)
 #         # if name_dset =='youtube' or name_dset=='census' or name_dset =='sms':
         if metric=='accuracy':
-        	# print('inside accuracy LR test')
-        	lr_acc =score(y_test, y_pred)
-        	lr_prec = prec_score(y_test, y_pred, average=None)
-        	lr_recall = recall_score(y_test, y_pred, average=None)
+            # print('inside accuracy LR test')
+            lr_acc =score(y_test, y_pred)
+            lr_prec = prec_score(y_test, y_pred, average=None)
+            lr_recall = recall_score(y_test, y_pred, average=None)
         print('Epoch ', epoch,  ' Test accuracy is ', lr_acc)
 
     
