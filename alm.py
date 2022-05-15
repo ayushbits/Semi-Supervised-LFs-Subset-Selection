@@ -475,7 +475,7 @@ class TrainALM():
 
         student_best_epoch = self.best_epoch
 
-        lr_model.load_state_dict(torch.load(self.save_folder+"/lr_"+ str(student_best_epoch)+".pt")['params'])            
+        lr_model.load_state_dict(torch.load(self.save_folder+"/student_lr_"+ str(student_best_epoch)+".pt")['params'])            
         probs = torch.nn.Softmax()(lr_model(self.x_test))
         y_pred = np.argmax(probs.detach().numpy(), 1)
         if self.metric=='accuracy':
