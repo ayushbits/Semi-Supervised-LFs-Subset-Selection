@@ -466,6 +466,7 @@ class TrainALM():
             probs = torch.nn.Softmax()(lr_model(self.x_valid))
             y_pred = np.argmax(probs.detach().numpy(), 1)
             val_acc = accuracy_score(self.y_valid, y_pred)
+            self.continuous_epochs = 20
             save, cont = self.check_stopping_cond( epoch, val_acc, self.continuous_epochs)
             if save==1:
                 checkpoint = {'params': lr_model.state_dict()}
