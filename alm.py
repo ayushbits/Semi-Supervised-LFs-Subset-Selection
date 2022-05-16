@@ -1,4 +1,4 @@
-#CUDA_VISIBLE_DEVICES=1 python3 alm.py /tmp l1 0 0 l4 0 l6 0 5 dsets/YOUTUBE 2 lr 0 32 0.0003 0.01 ''  accuracy
+ #CUDA_VISIBLE_DEVICES=1 python3 alm.py /tmp l1 0 0 l4 0 l6 0 1 dsets/YOUTUBE 2 lr 0 32 0.0003 0.01 ''  accuracy alm_exps/yt
 
 import torch
 import sys
@@ -64,7 +64,7 @@ class TrainALM():
         self.mode = sys.argv[17] #''
         self.metric = sys.argv[18]
         self.save_folder = sys.argv[19]
-        self.continuous_epochs = 10 # val accuracy should be consecutively below these many number of epochs
+        self.continuous_epochs = 100 # val accuracy should be consecutively below these many number of epochs
         # if self.metric=='accuracy':
         #     from sklearn.metrics import accuracy_score as score
         #     print('inside accuracy')
@@ -344,12 +344,13 @@ class TrainALM():
                 sup = []
                 supervised_indices = sample[4].nonzero().view(-1)
                 unsupervised_indices = (1-sample[4]).nonzero().squeeze().view(-1)
-                loss_GM = log_likelihood_loss(theta, pi_y, pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices],self.k, self.n_classes, self.continuous_mask)
+                loss_sup_GM = log_likelihood_loss_supervised(theta, pi_y, pi, sample[1][supervised_indices], sample[2][supervised_indices], sample[3][supervised_indices], self.k, self.n_classes, self.continuous_mask)
+                loss_unsup_GM = log_likelihood_loss(theta, pi_y, pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices],self.k, self.n_classes, self.continuous_mask)
                 prec_loss = precision_loss(theta, self.k, self.n_classes, self.a)
-                loss = loss_GM + prec_loss
+                loss = loss_sup_GM + loss_unsup_GM + prec_loss
                 loss.backward()
                 optimizer_gm.step()
-            print('Loss GM ', loss_GM.item())
+            print('Loss GM ', loss.item())
             y_pred = np.argmax(probability(theta, pi_y, pi, self.l_valid, self.s_valid, self.k, self.n_classes, self.continuous_mask).detach().numpy(), 1)
             val_acc = accuracy_score(self.y_valid, y_pred)
 
@@ -466,7 +467,7 @@ class TrainALM():
             probs = torch.nn.Softmax()(lr_model(self.x_valid))
             y_pred = np.argmax(probs.detach().numpy(), 1)
             val_acc = accuracy_score(self.y_valid, y_pred)
-            self.continuous_epochs = 20
+            
             save, cont = self.check_stopping_cond( epoch, val_acc, self.continuous_epochs)
             if save==1:
                 checkpoint = {'params': lr_model.state_dict()}
