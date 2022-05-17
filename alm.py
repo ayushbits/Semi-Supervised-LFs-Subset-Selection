@@ -312,7 +312,7 @@ class TrainALM():
             y_pred = np.argmax(probs.detach().numpy(), 1) 
             val_acc = 0
             if self.metric =='macro':
-                val_acc =accuracy_score(self.y_valid, y_pred, average='binary')
+                val_acc =accuracy_score(self.y_valid, y_pred, average='macro')
             else:
                 val_acc =accuracy_score(self.y_valid, y_pred)
             
@@ -333,7 +333,7 @@ class TrainALM():
         lr_acc = 0
         if self.metric =='macro':
             print('inside macro')
-            lr_acc =accuracy_score(self.y_test, y_pred, average='binary')
+            lr_acc =accuracy_score(self.y_test, y_pred, average='macro')
         else:
             print('inside else')
             lr_acc =accuracy_score(self.y_test, y_pred)
@@ -359,18 +359,18 @@ class TrainALM():
                 
                 loss_sup_GM = log_likelihood_loss_supervised(theta, pi_y, pi, sample[1][supervised_indices], sample[2][supervised_indices], sample[3][supervised_indices], self.k, self.n_classes, self.continuous_mask)
                 
-                # loss_unsup_GM = log_likelihood_loss(theta, pi_y, pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices],self.k, self.n_classes, self.continuous_mask)
+                loss_unsup_GM = log_likelihood_loss(theta, pi_y, pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices],self.k, self.n_classes, self.continuous_mask)
                 
                 prec_loss = precision_loss(theta, self.k, self.n_classes, self.a)
-                # loss = loss_sup_GM + loss_unsup_GM + prec_loss
-                loss = loss_sup_GM + prec_loss
+                loss = loss_sup_GM + loss_unsup_GM + prec_loss
+                # loss = loss_sup_GM + prec_loss
                 loss.backward()
                 optimizer_gm.step()
             # print('Loss GM ', loss.item())
             y_pred = np.argmax(probability(theta, pi_y, pi, self.l_valid, self.s_valid, self.k, self.n_classes, self.continuous_mask).detach().numpy(), 1)
             if self.metric =='macro':
                 # print('inside macro')
-                val_acc =accuracy_score(self.y_valid, y_pred, average='binary')
+                val_acc =accuracy_score(self.y_valid, y_pred, average='macro')
             else:
                 # print('inside else')
                 val_acc =accuracy_score(self.y_valid, y_pred)
@@ -392,7 +392,7 @@ class TrainALM():
         y_pred = np.argmax(probability(theta, pi_y, pi, self.l_test, self.s_test, self.k, self.n_classes, self.continuous_mask).detach().numpy(), 1)
         if self.metric =='macro':
             print('inside macro')
-            val_acc =accuracy_score(self.y_test, y_pred, average='binary')
+            val_acc =accuracy_score(self.y_test, y_pred, average='macro')
         else:
             print('inside else')
             val_acc =accuracy_score(self.y_test, y_pred)
@@ -444,10 +444,10 @@ class TrainALM():
                 pi = torch.load(self.save_folder+'/gm_' + str(gm_best_epoch)+ '.pt')['pi']
                 pi_y = torch.load(self.save_folder+'/gm_' + str(gm_best_epoch)+ '.pt')['pi_y']
                 theta = torch.load(self.save_folder+'/gm_' + str(gm_best_epoch)+ '.pt')['theta']
-                probs_graphical = probability(theta, pi_y, pi,sample[2][unsupervised_indices],sample[3][unsupervised_indices], self.k, self.n_classes, self.continuous_mask)
-                targets = (probs_graphical.t() / probs_graphical.sum(1)).t()
-                outputs_tensor = torch.Tensor(outputs)
-                targets_tensor = torch.Tensor(targets)
+                probs_graphical = np.argmax(probability(theta, pi_y, pi,sample[2][unsupervised_indices],sample[3][unsupervised_indices], self.k, self.n_classes, self.continuous_mask).detach().numpy(), 1)
+                # targets = (probs_graphical.t() / probs_graphical.sum(1)).t()
+                # outputs_tensor = torch.Tensor(outputs)
+                targets_tensor = torch.tensor(probs_graphical)
                 
                 
                 loss_SL = supervised_criterion_nored(lr_outputs, targets_tensor)
@@ -495,7 +495,7 @@ class TrainALM():
             y_pred = np.argmax(probs.detach().numpy(), 1)
             val_acc = 0
             if self.metric =='macro':
-                val_acc =accuracy_score(self.y_valid, y_pred, average='binary')
+                val_acc =accuracy_score(self.y_valid, y_pred, average='macro')
             else:
                 val_acc =accuracy_score(self.y_valid, y_pred)
             # val_acc = accuracy_score(self.y_valid, y_pred)
@@ -516,7 +516,7 @@ class TrainALM():
         lr_acc = 0
         if self.metric =='macro':
             print('inside macro')
-            lr_acc = accuracy_score(self.y_test, y_pred, average='binary')
+            lr_acc = accuracy_score(self.y_test, y_pred, average='macro')
         else:
             print('inside else')
             lr_acc = accuracy_score(self.y_test, y_pred)

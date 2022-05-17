@@ -378,7 +378,7 @@ class TrainALM():
             y_pred = np.argmax(probs.detach().numpy(), 1)
             val_acc = 0
             if self.metric =='macro':
-                val_acc =accuracy_score(self.y_valid, y_pred, average='binary')
+                val_acc =accuracy_score(self.y_valid, y_pred, average='macro')
             else:
                 val_acc =accuracy_score(self.y_valid, y_pred)
             # val_acc = accuracy_score(self.y_valid, y_pred)
@@ -399,7 +399,7 @@ class TrainALM():
         lr_acc = 0
         if self.metric =='macro':
             print('inside macro')
-            lr_acc = accuracy_score(self.y_test, y_pred, average='binary')
+            lr_acc = accuracy_score(self.y_test, y_pred, average='macro')
         else:
             print('inside else')
             lr_acc = accuracy_score(self.y_test, y_pred)
