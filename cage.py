@@ -71,10 +71,13 @@ def log_likelihood_loss(theta, pi_y, pi, l, s, k, n_classes, continuous_mask):
     return - torch.log(probability(theta, pi_y, pi, l, s, k, n_classes, continuous_mask).sum(1)).sum() / s.shape[0]
 
 
-def log_likelihood_loss_supervised(theta, pi_y, pi, y, l, s, k, n_classes, continuous_mask):
+def log_likelihood_loss_supervised(theta, pi_y, pi, y, l, s, k, n_classes, continuous_mask):#,reduction='mean'
     eps = 1e-8
     prob = probability(theta, pi_y, pi, l, s, k, n_classes, continuous_mask)
     prob = (prob.t() / prob.sum(1)).t()
+    '''if reduction =="none":
+        return torch.nn.NLLLoss(reduction='none')(torch.log(prob), y)
+    else:'''
     return torch.nn.NLLLoss()(torch.log(prob), y)
     # return - torch.log(probability(theta, pi_y, pi, l, s, k, n_classes, continuous_mask)[:, y] + eps).mean()# / s.shape[0]
 

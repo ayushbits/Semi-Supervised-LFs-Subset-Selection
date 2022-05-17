@@ -14,7 +14,10 @@ import pickle
 from torch.utils.data import TensorDataset, DataLoader,Dataset 
 import torch.nn.functional as F
 
-from LearnMultiLambdaMeta import LearnMultiLambdaMeta
+import torch.nn as nn
+
+
+from LearnMultiLambdaMetaJoint import LearnMultiLambdaMeta
 import copy
 
 from sklearn.metrics import precision_score as prec_score
@@ -238,9 +241,12 @@ class TrainALM():
         # supervised_mask = torch.cat([torch.ones(l_supervised.shape[0]), torch.zeros(l_unsupervised.shape[0])])
         print('X_train', x_train.shape, 'l',l.shape, 's', s.shape)
 
-        
+        supervised_indices = supervised_mask.nonzero().view(-1)
+        unsupervised_indices = (1-supervised_mask).nonzero().squeeze().view(-1)
 
-        self.lambdas = torch.full((len(self.y_train),2),self._lambda)
+        self.lambdas = torch.full((len(self.y_train),3),self._lambda)
+        self.lambdas[supervised_indices,1] = 0
+        self.lambdas[unsupervised_indices,0] = 0
         self.dataset = TensorDataset(x_train, self.y_train, l, s, supervised_mask, self.lambdas)
         # return lambdas, dataset
 
@@ -306,7 +312,7 @@ class TrainALM():
 
         if self.lam_learn: 
             lelam = LearnMultiLambdaMeta(loader_ind, self.x_valid,self.y_valid, copy.deepcopy(lr_model), self.n_classes, len(self.y_train), \
-                supervised_criterion_nored, "cpu", 2,teacher_lr_model,theta, pi_y, pi,self.k, self.continuous_mask,\
+                supervised_criterion_nored, "cpu", 2,theta, pi_y, pi,self.k, self.continuous_mask,\
                     supervised_criterion, Temp)
                     
         ## Training student model here ------------
@@ -325,17 +331,16 @@ class TrainALM():
                 unsupervised_indices = (1-sample[4]).nonzero().squeeze().view(-1)
                 # Case I - CE for theta model
                 if len(supervised_indices) > 0:
-                    loss_1 = supervised_criterion(lr_model(sample[0][supervised_indices]), sample[1][supervised_indices])
-                else:
-                    loss_1 = 0
+                    loss_1 = supervised_criterion_nored(lr_model(sample[0][supervised_indices]), sample[1][supervised_indices])
 
-                y_pred_unsupervised = np.argmax(probability(theta, pi_y, pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], self.k, self.n_classes,continuous_mask).detach().numpy(), 1)
-                loss_3 = supervised_criterion(lr_model(sample[0][unsupervised_indices]), torch.tensor(y_pred_unsupervised))
+                y_pred_unsupervised = np.argmax(probability(theta, pi_y, pi, sample[2][unsupervised_indices], \
+                    sample[3][unsupervised_indices], self.k, self.n_classes,self.continuous_mask).detach().numpy(), 1)
+                loss_3 = supervised_criterion_nored(lr_model(sample[0][unsupervised_indices]), torch.tensor(y_pred_unsupervised))
 
                 if len(supervised_indices) > 0:
-                    loss_4 = log_likelihood_loss_supervised(theta, pi_y, pi, sample[1][supervised_indices], sample[2][supervised_indices], sample[3][supervised_indices], self.k, self.n_classes, self.continuous_mask)
-                else:
-                    loss_4 = 0
+                    loss_4 = log_likelihood_loss_supervised(theta, pi_y, pi, sample[1][supervised_indices], \
+                        sample[2][supervised_indices], sample[3][supervised_indices], self.k, self.n_classes, \
+                            self.continuous_mask)
 
                 if len(supervised_indices) >0:
                     supervised_indices = supervised_indices.tolist()
@@ -345,17 +350,28 @@ class TrainALM():
                     probs_graphical = probability(theta, pi_y, pi,sample[2][unsupervised_indices],sample[3][unsupervised_indices], self.k, self.n_classes, self.continuous_mask)
 
                 probs_graphical = (probs_graphical.t() / probs_graphical.sum(1)).t()
-                probs_lr = F.Softmax()(lr_model(sample[0]))
-                loss_6 = torch.nn.KLDivLoss(probs_lr, probs_graphical)
+                probs_lr = nn.Softmax()(lr_model(sample[0]))
+                loss_6 = torch.sum(torch.nn.KLDivLoss(reduction='none')(probs_lr, probs_graphical),dim=1)
 
-                loss = loss_1 + loss_3 + loss_4 + loss_6
+                #print(loss_1.shape,loss_3.shape,loss_6.shape )
+                #print(len(sample[5][supervised_indices]),len(sample[5][unsupervised_indices]))
+
+                if len(supervised_indices) >0:
+                    loss_super = loss_4 + (sample[5][supervised_indices][:,0]*loss_1 + \
+                        sample[5][supervised_indices][:,2]*loss_6[supervised_indices]).mean() 
+                else:
+                    loss_super = 0
+                loss_un =(sample[5][unsupervised_indices][:,1]*loss_3 + \
+                    sample[5][unsupervised_indices][:,2]*loss_6[unsupervised_indices]).mean() 
+                #print(loss_super,sample[5][unsupervised_indices][:,1]*loss_3,sample[5][unsupervised_indices][:,2]*loss_6[unsupervised_indices])
+                loss = loss_super+ loss_un 
                 
                 loss.backward()
                 optimizer_lr.step()
                 optimizer_gm.step()
             # print('Epoch ', epoch, ' loss is ',  loss.item() )
 
-            if self.lam_learn:
+            if self.lam_learn and epoch > 10:
 
                 cached_state_dictT = copy.deepcopy(lr_model.state_dict())
                 clone_dict = copy.deepcopy(lr_model.state_dict())
@@ -364,11 +380,11 @@ class TrainALM():
 
                 self.lambdas = lelam.get_lambdas(optimizer_lr.param_groups[0]['lr'], epoch, self.lambdas)
                 
-                # for m in range(2):
+                #for m in range(3):
                 # if save:
-                #     print(torch.median(self.lambdas[:,0]).item() , ' , ' , torch.median(self.lambdas[:,1]).item())
-                    # print(self.lambdas[:,m].max(), self.lambdas[:,m].min(), torch.median(self.lambdas[:,m]),\
-                    #         torch.quantile(self.lambdas[:,m], 0.75),torch.quantile(self.lambdas[:,m], 0.25))
+                # print(torch.median(self.lambdas[:,0]).item() , ' , ' , torch.median(self.lambdas[:,1]).item())
+                #    print(m,self.lambdas[:,m].max(), self.lambdas[:,m].min(), torch.median(self.lambdas[:,m]),\
+                #             torch.quantile(self.lambdas[:,m], 0.75),torch.quantile(self.lambdas[:,m], 0.25))
 
                 # self.dataset = TensorDataset(x_train, y_train, l, s, supervised_mask, lambdas)
 
