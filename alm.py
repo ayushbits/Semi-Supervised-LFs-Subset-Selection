@@ -1,5 +1,5 @@
- #CUDA_VISIBLE_DEVICES=1 python3 alm.py /tmp l1 0 0 l4 0 l6 0 1 dsets/YOUTUBE 2 lr 0 32 0.0003 0.01 ''  accuracy alm_exps/yt
-
+#CUDA_VISIBLE_DEVICES=1 python3 ss_generic.py 1 dsets/YOUTUBE 2 lr 32 0.0003 0.01 ''  accuracy
+# CUDA_VISIBLE_DEVICES=2 python3 alm.py 1 dsets/MITR/  9 nn 512 0.0003 0.01 ''  macro  /tmp
 import torch
 import sys
 import numpy as np
@@ -20,7 +20,8 @@ import copy
 from sklearn.metrics import precision_score as prec_score
 from sklearn.metrics import recall_score as recall_score
 from sklearn.metrics import accuracy_score 
-from sklearn.metrics import f1_score 
+if sys.argv[9] == 'macro':
+    from sklearn.metrics import f1_score as accuracy_score
 
 Temp = 4 
 use_cuda = torch.cuda.is_available()
@@ -28,8 +29,9 @@ device = torch.device("cuda:0" if use_cuda else "cpu")
 torch.backends.cudnn.benchmark = True
 
 torch.set_default_dtype(torch.float64)
-torch.manual_seed(25)
-
+seed = 7 #25, 42 , 7
+torch.manual_seed(seed)
+print('Seed is ', seed)
 
 class MyDataset(Dataset):
     def __init__(self,dataset):
@@ -48,23 +50,22 @@ class TrainALM():
 
     def __init__(self):
         self.lam_learn = True
-        self._lambda = 0.5 
+        self._lambda = 1.0
         self.best_epoch = 0
         self.best_score = 0
-        self.num_runs = int(sys.argv[9])
-        self.dset_directory = sys.argv[10]
-        self.n_classes = int(sys.argv[11])
-        self.feat_model = sys.argv[12]
-        self.qg_available = int(sys.argv[13])
-        self.batch_size = int(sys.argv[14])
-        self.lr_fnetwork = float(sys.argv[15])
-        self.lr_gm = float(sys.argv[16])
+        self.num_runs = int(sys.argv[1])
+        self.dset_directory = sys.argv[2]
+        self.n_classes = int(sys.argv[3])
+        self.feat_model = sys.argv[4]
+        self.batch_size = int(sys.argv[5])
+        self.lr_fnetwork = float(sys.argv[6])
+        self.lr_gm = float(sys.argv[7])
         # self.name_dset = dset_directory.split("/")[-1].lower()
         # print('dset is ', name_dset)
-        self.mode = sys.argv[17] #''
-        self.metric = sys.argv[18]
-        self.save_folder = sys.argv[19]
-        self.continuous_epochs = 100 # val accuracy should be consecutively below these many number of epochs
+        self.mode = sys.argv[8] #''
+        self.metric = sys.argv[9]
+        self.save_folder = sys.argv[10]
+        self.continuous_epochs = 20 # val accuracy should be consecutively below these many number of epochs
         # if self.metric=='accuracy':
         #     from sklearn.metrics import accuracy_score as score
         #     print('inside accuracy')
@@ -177,17 +178,17 @@ class TrainALM():
         print('LFs are ',self.k)
         print('no of lfs are ', self.n_lfs)
 
-        if self.qg_available:
-            self.a = torch.from_numpy(np.load(self.dset_directory+'/prec.npy')).double()
-        else:
-            prec_lfs=[]
-            for i in range(self.n_lfs):
-                correct = 0
-                for j in range(len(self.y_valid)):
-                    if self.y_valid[j] == self.l_valid[j][i]:
-                        correct+=1
-                prec_lfs.append(correct/len(self.y_valid))
-            self.a = torch.tensor(prec_lfs).double()
+        # if self.qg_available:
+        #     self.a = torch.from_numpy(np.load(self.dset_directory+'/prec.npy')).double()
+        # else:
+        prec_lfs=[]
+        for i in range(self.n_lfs):
+            correct = 0
+            for j in range(len(self.y_valid)):
+                if self.y_valid[j] == self.l_valid[j][i]:
+                    correct+=1
+            prec_lfs.append(correct/len(self.y_valid))
+        self.a = torch.tensor(prec_lfs).double()
 
 
         self.continuous_mask = torch.zeros(self.n_lfs).double()
@@ -227,7 +228,14 @@ class TrainALM():
         s = torch.cat([s_supervised, s_unsupervised])
         x_train = torch.cat([x_supervised, x_unsupervised])
         self.y_train = torch.cat([y_supervised, y_unsupervised])
-        supervised_mask = torch.cat([torch.ones(l_supervised.shape[0]), torch.zeros(l_unsupervised.shape[0])])
+        #selecting random instances here
+        np.random.seed(seed)
+        indices = np.random.choice(np.arange(x_train.shape[0]), len(x_supervised), replace=False)
+        supervised_mask = torch.zeros(x_train.shape[0])
+        supervised_mask[indices] = 1
+        ######## 
+        #handpicked here
+        # supervised_mask = torch.cat([torch.ones(l_supervised.shape[0]), torch.zeros(l_unsupervised.shape[0])])
         print('X_train', x_train.shape, 'l',l.shape, 's', s.shape)
 
         
@@ -266,11 +274,12 @@ class TrainALM():
         pi_y.requires_grad = True
 
         if self.feat_model == 'lr':
-            teacher_lr_model = LogisticRegression(self.n_features, self.n_classes)
-            lr_model = LogisticRegression(self.n_features, self.n_classes)
+            teacher_lr_model = LogisticRegression(self.n_features, self.n_classes,  seed = seed)
+            lr_model = LogisticRegression(self.n_features, self.n_classes,  seed = seed)
         elif self.feat_model =='nn':
             n_hidden = 512
-            lr_model = DeepNet(self.n_features, n_hidden, self.n_classes)
+            teacher_lr_model = DeepNet(self.n_features, n_hidden, self.n_classes,  seed = seed)
+            lr_model = DeepNet(self.n_features, n_hidden, self.n_classes,  seed = seed)
         else:
             print('Please provide feature based model : lr or nn')
             exit()
@@ -278,9 +287,7 @@ class TrainALM():
 
         # optimizer = torch.optim.Adam([{"params": lr_model.parameters()}, {"params": [pi, pi_y, theta]}], lr=0.001)
         teacher_optimizer_lr = torch.optim.Adam(teacher_lr_model.parameters(), lr=self.lr_fnetwork) #theta'
-        optimizer_lr = torch.optim.Adam(lr_model.parameters(), lr=self.lr_fnetwork) # theta
         optimizer_gm = torch.optim.Adam([theta, pi, pi_y], lr=self.lr_gm, weight_decay=0)
-        # optimizer = torch.optim.Adam([theta, pi, pi_y], lr=0.01, weight_decay=0)
 
         supervised_criterion = torch.nn.CrossEntropyLoss()
         supervised_criterion_nored = torch.nn.CrossEntropyLoss(reduction='none')
@@ -293,7 +300,7 @@ class TrainALM():
         for epoch in range(100):
             teacher_lr_model.train()
             for batch_ndx, sample in enumerate(loader):
-                optimizer_lr.zero_grad()
+                teacher_optimizer_lr.zero_grad()
                 sup = []
                 supervised_indices = sample[4].nonzero().view(-1)
                 if len(supervised_indices) > 0:
@@ -302,8 +309,13 @@ class TrainALM():
                     teacher_optimizer_lr.step()
 
             probs = torch.nn.Softmax()(teacher_lr_model(self.x_valid))
-            y_pred = np.argmax(probs.detach().numpy(), 1)
-            val_acc = accuracy_score(self.y_valid, y_pred)
+            y_pred = np.argmax(probs.detach().numpy(), 1) 
+            val_acc = 0
+            if self.metric =='macro':
+                val_acc =accuracy_score(self.y_valid, y_pred, average='binary')
+            else:
+                val_acc =accuracy_score(self.y_valid, y_pred)
+            
 
             save, cont = self.check_stopping_cond( epoch, val_acc, self.continuous_epochs)
             if save==1:
@@ -312,48 +324,57 @@ class TrainALM():
             if cont==0:
                 break           
 
-            print('Epoch ', epoch)     
-
         lr_best_epoch = self.best_epoch
-      
+        ## Testing Teacher 1 Model Now
 
-             
-        # if name_dset =='youtube' or name_dset=='census' or name_dset =='sms':
-        if self.metric=='accuracy':
-            # print('inside accuracy LR test')
-            teacher_lr_model.load_state_dict(torch.load(self.save_folder+"/lr_"+ str(lr_best_epoch)+".pt")['params'])
-            probs = torch.nn.Softmax()(teacher_lr_model(self.x_test))
-            y_pred = np.argmax(probs.detach().numpy(), 1)
+        teacher_lr_model.load_state_dict(torch.load(self.save_folder+"/lr_"+ str(lr_best_epoch)+".pt")['params'])
+        probs = torch.nn.Softmax()(teacher_lr_model(self.x_test))
+        y_pred = np.argmax(probs.detach().numpy(), 1)
+        lr_acc = 0
+        if self.metric =='macro':
+            print('inside macro')
+            lr_acc =accuracy_score(self.y_test, y_pred, average='binary')
+        else:
+            print('inside else')
             lr_acc =accuracy_score(self.y_test, y_pred)
-            lr_prec = prec_score(self.y_test, y_pred, average=None)
-            lr_recall = recall_score(self.y_test, y_pred, average=None)
+        lr_prec = prec_score(self.y_test, y_pred, average=None)
+        lr_recall = recall_score(self.y_test, y_pred, average=None)
 
-        print("Teacher Model 1 Test accuracy Epoch: {}\tTest LR accuracy_score: {}".format(self.best_epoch, lr_acc))
+        print("Teacher Model 1 Test Epoch: {}\tTest LR score: {}".format(self.best_epoch, lr_acc))
         # Finished teacher model 1 here -----------------
 
         # Training teacher Model 2 (GM) here ----
 
         self.best_epoch = 0
         self.best_score = 0
-        self.val_acc = 0
+        val_acc = 0
+        self.continuous_epochs = 100
         print('\n Teacher 2 Training Beginning -------------------- ')
         for epoch in range (100):
-            optimizer_gm.zero_grad()
             for batch_ndx, sample in enumerate(loader):
                 optimizer_gm.zero_grad()
                 sup = []
                 supervised_indices = sample[4].nonzero().view(-1)
                 unsupervised_indices = (1-sample[4]).nonzero().squeeze().view(-1)
+                
                 loss_sup_GM = log_likelihood_loss_supervised(theta, pi_y, pi, sample[1][supervised_indices], sample[2][supervised_indices], sample[3][supervised_indices], self.k, self.n_classes, self.continuous_mask)
-                loss_unsup_GM = log_likelihood_loss(theta, pi_y, pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices],self.k, self.n_classes, self.continuous_mask)
+                
+                # loss_unsup_GM = log_likelihood_loss(theta, pi_y, pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices],self.k, self.n_classes, self.continuous_mask)
+                
                 prec_loss = precision_loss(theta, self.k, self.n_classes, self.a)
-                loss = loss_sup_GM + loss_unsup_GM + prec_loss
+                # loss = loss_sup_GM + loss_unsup_GM + prec_loss
+                loss = loss_sup_GM + prec_loss
                 loss.backward()
                 optimizer_gm.step()
-            print('Loss GM ', loss.item())
+            # print('Loss GM ', loss.item())
             y_pred = np.argmax(probability(theta, pi_y, pi, self.l_valid, self.s_valid, self.k, self.n_classes, self.continuous_mask).detach().numpy(), 1)
-            val_acc = accuracy_score(self.y_valid, y_pred)
-
+            if self.metric =='macro':
+                # print('inside macro')
+                val_acc =accuracy_score(self.y_valid, y_pred, average='binary')
+            else:
+                # print('inside else')
+                val_acc =accuracy_score(self.y_valid, y_pred)
+            
             save, cont = self.check_stopping_cond( epoch, val_acc, self.continuous_epochs)
             if save==1:
                 checkpoint = {'theta': theta,'pi': pi, 'pi_y':pi_y}
@@ -361,7 +382,7 @@ class TrainALM():
             if cont==0:
                 break          
 
-            print('Epoch ', epoch)
+            # print('Epoch ', epoch)
 
         gm_best_epoch = self.best_epoch
 
@@ -369,30 +390,34 @@ class TrainALM():
         pi_y = torch.load(self.save_folder+'/gm_' + str(gm_best_epoch)+ '.pt')['pi_y']
         theta = torch.load(self.save_folder+'/gm_' + str(gm_best_epoch)+ '.pt')['theta']
         y_pred = np.argmax(probability(theta, pi_y, pi, self.l_test, self.s_test, self.k, self.n_classes, self.continuous_mask).detach().numpy(), 1)
-        val_acc = accuracy_score(self.y_test, y_pred)
-        print("Teacher Model 2 Test accuracy Epoch: {}\tTest LR accuracy_score: {}".format(self.best_epoch, val_acc))
-        
-        
+        if self.metric =='macro':
+            print('inside macro')
+            val_acc =accuracy_score(self.y_test, y_pred, average='binary')
+        else:
+            print('inside else')
+            val_acc =accuracy_score(self.y_test, y_pred)
 
 
+        print("Teacher Model 2 Test Epoch: {}\tTest GM score: {}".format(self.best_epoch, val_acc))
+        
         self.best_epoch = 0
         self.best_score = 0
-        self.val_acc = 0
-        # Testing teacher model 1 here 
-       
+        val_acc = 0
+        self.continuous_epochs = 100
 
         if self.lam_learn: 
             lelam = LearnMultiLambdaMeta(loader_ind, self.x_valid,self.y_valid, copy.deepcopy(lr_model), self.n_classes, len(self.y_train), \
                 supervised_criterion_nored, "cpu", 2,teacher_lr_model,theta, pi_y, pi,self.k, self.continuous_mask,\
                     supervised_criterion, Temp)
                     
-
+        ## Training student model here ------------
+        
+        optimizer_lr = torch.optim.Adam(lr_model.parameters(), lr=self.lr_fnetwork) # theta
         for epoch in range(100):
             lr_model.train()
 
             for batch_ndx, sample in enumerate(loader):
                 optimizer_lr.zero_grad()
-                optimizer_gm.zero_grad()
 
                 unsup = []
                 sup = []
@@ -415,6 +440,7 @@ class TrainALM():
                 
 
                 # GM Model Test
+                #loading best GM model heres
                 pi = torch.load(self.save_folder+'/gm_' + str(gm_best_epoch)+ '.pt')['pi']
                 pi_y = torch.load(self.save_folder+'/gm_' + str(gm_best_epoch)+ '.pt')['pi_y']
                 theta = torch.load(self.save_folder+'/gm_' + str(gm_best_epoch)+ '.pt')['theta']
@@ -444,7 +470,7 @@ class TrainALM():
 
                 loss.backward()
                 optimizer_lr.step()
-            print('Epoch ', epoch, ' loss is ',  loss.item() )
+            # print('Epoch ', epoch, ' loss is ',  loss.item() )
 
             if self.lam_learn:
 
@@ -455,8 +481,9 @@ class TrainALM():
 
                 self.lambdas = lelam.get_lambdas(optimizer_lr.param_groups[0]['lr'], epoch, self.lambdas)
                 
-                for m in range(2):
-                    print(torch.median(self.lambdas[:,m]).item())
+                # for m in range(2):
+                # if save:
+                #     print(torch.median(self.lambdas[:,0]).item() , ' , ' , torch.median(self.lambdas[:,1]).item())
                     # print(self.lambdas[:,m].max(), self.lambdas[:,m].min(), torch.median(self.lambdas[:,m]),\
                     #         torch.quantile(self.lambdas[:,m], 0.75),torch.quantile(self.lambdas[:,m], 0.25))
 
@@ -466,12 +493,18 @@ class TrainALM():
 
             probs = torch.nn.Softmax()(lr_model(self.x_valid))
             y_pred = np.argmax(probs.detach().numpy(), 1)
-            val_acc = accuracy_score(self.y_valid, y_pred)
+            val_acc = 0
+            if self.metric =='macro':
+                val_acc =accuracy_score(self.y_valid, y_pred, average='binary')
+            else:
+                val_acc =accuracy_score(self.y_valid, y_pred)
+            # val_acc = accuracy_score(self.y_valid, y_pred)
             
             save, cont = self.check_stopping_cond( epoch, val_acc, self.continuous_epochs)
             if save==1:
                 checkpoint = {'params': lr_model.state_dict()}
                 torch.save(checkpoint, self.save_folder+"/student_lr_"+ str(epoch)+".pt")
+                print(torch.median(self.lambdas[:,0]).item() , ' , ' , torch.median(self.lambdas[:,1]).item())
             if cont==0:
                 break  
 
@@ -480,13 +513,17 @@ class TrainALM():
         lr_model.load_state_dict(torch.load(self.save_folder+"/student_lr_"+ str(student_best_epoch)+".pt")['params'])            
         probs = torch.nn.Softmax()(lr_model(self.x_test))
         y_pred = np.argmax(probs.detach().numpy(), 1)
-        if self.metric=='accuracy':
-            # print('inside accuracy LR test')
+        lr_acc = 0
+        if self.metric =='macro':
+            print('inside macro')
+            lr_acc = accuracy_score(self.y_test, y_pred, average='binary')
+        else:
+            print('inside else')
             lr_acc = accuracy_score(self.y_test, y_pred)
-            lr_prec = prec_score(self.y_test, y_pred, average=None)
-            lr_recall = recall_score(self.y_test, y_pred, average=None)
-        print('Epoch ', epoch,  ' Test accuracy is ', lr_acc)
-
+        lr_prec = prec_score(self.y_test, y_pred, average=None)
+        lr_recall = recall_score(self.y_test, y_pred, average=None)
+        print('Epoch ', self.best_epoch,  ' Test score is ', lr_acc)
+        print('Seed is ', seed)
 
 if __name__=='__main__':
     alm = TrainALM()

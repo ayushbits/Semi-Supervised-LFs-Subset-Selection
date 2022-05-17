@@ -20,7 +20,8 @@ torch.backends.cudnn.benchmark = True
 
 torch.set_default_dtype(torch.float64)
 torch.set_printoptions(threshold=20)
-
+seed = 17#7,25
+torch.manual_seed(seed)
 objs = []
 dset_directory = sys.argv[10]
 n_classes = int(sys.argv[11])
@@ -205,7 +206,15 @@ l = torch.cat([l_supervised, l_unsupervised])
 s = torch.cat([s_supervised, s_unsupervised])
 x_train = torch.cat([x_supervised, x_unsupervised])
 y_train = torch.cat([y_supervised, y_unsupervised])
-supervised_mask = torch.cat([torch.ones(l_supervised.shape[0]), torch.zeros(l_unsupervised.shape[0])])
+#selecting random instances here
+np.random.seed(seed)
+indices = np.random.choice(np.arange(x_train.shape[0]), len(x_supervised), replace=False)
+supervised_mask = torch.zeros(x_train.shape[0])
+supervised_mask[indices] = 1
+######## 
+#handpicked here
+
+# supervised_mask = torch.cat([torch.ones(l_supervised.shape[0]), torch.zeros(l_unsupervised.shape[0])])
 print('X_train', x_train.shape, 'l',l.shape, 's', s.shape)
 
 ## Quality Guides ##
@@ -241,7 +250,7 @@ for lo in range(0,num_runs):
     pi_y.requires_grad = True
 
     if feat_model == 'lr':
-        lr_model = LogisticRegression(n_features, n_classes)
+        lr_model = LogisticRegression(n_features, n_classes, seed = seed)
     elif feat_model =='nn':
         n_hidden = 512
         lr_model = DeepNet(n_features, n_hidden, n_classes)
@@ -250,7 +259,7 @@ for lo in range(0,num_runs):
         exit()
 
 
-    optimizer = torch.optim.Adam([{"params": lr_model.parameters()}, {"params": [pi, pi_y, theta]}], lr=0.001)
+    # optimizer = torch.optim.Adam([{"params": lr_model.parameters()}, {"params": [pi, pi_y, theta]}], lr=0.001)
     optimizer_lr = torch.optim.Adam(lr_model.parameters(), lr=lr_fnetwork)
     optimizer_gm = torch.optim.Adam([theta, pi, pi_y], lr=lr_gm, weight_decay=0)
     # optimizer = torch.optim.Adam([theta, pi, pi_y], lr=0.01, weight_decay=0)
@@ -326,7 +335,7 @@ for lo in range(0,num_runs):
                 probs_lr = torch.nn.Softmax()(lr_model(sample[0]))
                 loss_6 = kl_divergence(probs_lr, probs_graphical)
                 # loss_6 = kl_divergence(probs_graphical, probs_lr) #original version
-
+ 
             else:
                 loss_6= 0
             # loss_6 = - torch.log(1 - probs_graphical * (1 - probs_lr)).sum(1).mean()
@@ -390,8 +399,8 @@ for lo in range(0,num_runs):
             lr_valid_acc = score(y_valid, y_pred, average=metric_avg)
         print("Epoch: {}\t Test GM accuracy_score: {}".format(epoch, gm_acc ))
         print("Epoch: {}\tGM accuracy_score(Valid): {}".format(epoch, gm_valid_acc))
-        # print("Epoch: {}\tTest LR accuracy_score: {}".format(epoch, lr_acc))    
-#         print("Epoch: {}\tLR accuracy_score(Valid): {}".format(epoch, lr_valid_acc))
+        print("Epoch: {}\tTest LR accuracy_score: {}".format(epoch, lr_acc))    
+        print("Epoch: {}\tLR accuracy_score(Valid): {}".format(epoch, lr_valid_acc))
         wname = "Run_"+str(lo)+" LR valid score"
         wnamegm = 'Run_' + str(lo) + ' GM valid score'
         #wandb.log({wname:lr_valid_acc, 
