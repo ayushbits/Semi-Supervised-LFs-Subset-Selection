@@ -1,5 +1,5 @@
-#CUDA_VISIBLE_DEVICES=1 python3 ss_generic.py 1 dsets/YOUTUBE 2 lr 32 0.0003 0.01 ''  accuracy
-# CUDA_VISIBLE_DEVICES=2 python3 alm.py 1 dsets/MITR/  9 nn 512 0.0003 0.01 ''  macro  /tmp
+# CUDA_VISIBLE_DEVICES=2 python3 alm_joint.py 1 dsets/MITR/  9 nn 512 0.0003 0.01 ''  macro  /tmp
+# CUDA_VISIBLE_DEVICES=2 python3 alm_joint.py 1 dsets/YOUTUBE/  2 lr 32 0.0003 0.001 ''  accuracy  /tmp
 import torch
 import sys
 import numpy as np
