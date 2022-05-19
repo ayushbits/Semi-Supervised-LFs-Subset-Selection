@@ -34,7 +34,7 @@ path_dir = sys.argv[1] #path to data strored in form of pickles
 num_classes = int(sys.argv[2]) #num of classes to be predicted (depends on the dataset)
 default_class = sys.argv[3] #default class (usually the most frequent class) can also be "None"
 
-validation_pickle = open(os.path.join(path_dir,"normal_validation_processed.p"),"rb")
+validation_pickle = open(os.path.join(path_dir,"validation_processed.p"),"rb")
 validation_x=pickle.load(validation_pickle)
 validation_l=pickle.load(validation_pickle)
 validation_m=pickle.load(validation_pickle)
@@ -52,10 +52,11 @@ print("Recall of majority voting on validation data: ", recall)
 print("f1_score of majority voting on validation data: ", f1_score)
 print("support of majority voting on validation data: ", support)
 
-U_pickle = open(os.path.join(path_dir,"normal_U_processed.p"),"rb")
+U_pickle = open(os.path.join(path_dir,"U_processed.p"),"rb")
 U_x=pickle.load(U_pickle)
 U_l=pickle.load(U_pickle)
 U_m=pickle.load(U_pickle)
+
 U_L=pickle.load(U_pickle)
 U_d=pickle.load(U_pickle)
 fired_U_idx = [i for i,item in enumerate(U_m) if np.sum(item)!=0] # instance indices on which 
@@ -68,7 +69,7 @@ print("Size of fired U: ", len(fired_U_idx))
 print("Cover percentage: ",len(fired_U_idx)/len(U_x))
 
 
-d_pickle = open(os.path.join(path_dir,"normal_d_processed.p"),"rb")
+d_pickle = open(os.path.join(path_dir,"d_processed.p"),"rb")
 d_x=pickle.load(d_pickle)
 d_l=pickle.load(d_pickle)
 d_m=pickle.load(d_pickle)
@@ -76,7 +77,7 @@ d_L=pickle.load(d_pickle)
 d_d=pickle.load(d_pickle)
 print("Size of d: ",len(d_x))
 
-test_pickle = open(os.path.join(path_dir,"normal_test_processed.p"),"rb")
+test_pickle = open(os.path.join(path_dir,"test_processed.p"),"rb")
 test_x=pickle.load(test_pickle)
 test_l=pickle.load(test_pickle)
 test_m=pickle.load(test_pickle)

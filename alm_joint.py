@@ -1,5 +1,6 @@
-# CUDA_VISIBLE_DEVICES=2 python3 alm_joint.py 1 dsets/MITR/  9 nn 512 0.0003 0.01 ''  macro  /tmp
-# CUDA_VISIBLE_DEVICES=2 python3 alm_joint.py 1 dsets/YOUTUBE/  2 lr 32 0.0003 0.001 ''  accuracy  /tmp
+
+#CUDA_VISIBLE_DEVICES=2 python3 alm_joint.py 1 dsets/SMS/  2 nn 256 0.0001 0.01 ''  macro  alm_exps/sms False l1
+# python3 alm_joint.py 1 dsets/imdb_original 2 lr 32 0.0003 0.01 ''  macro alm_exps/imdb  True all
 import torch
 import sys
 import numpy as np
@@ -32,13 +33,14 @@ device = torch.device("cuda:0" if use_cuda else "cpu")
 torch.backends.cudnn.benchmark = True
 
 torch.set_default_dtype(torch.float64)
-seed = 7 #25, 42 , 7
+seed = 17 #25, 42 , 7, 17
 torch.manual_seed(seed)
 print('Seed is ', seed)
 
 class MyDataset(Dataset):
     def __init__(self,dataset):
         self.dataset = dataset
+
 
     def __getitem__(self, index):
         sample = self.dataset[index]
@@ -52,7 +54,6 @@ class MyDataset(Dataset):
 class TrainALM():
 
     def __init__(self):
-        self.lam_learn = True
         self._lambda = 1.0
         self.best_epoch = 0
         self.best_score = 0
@@ -68,7 +69,15 @@ class TrainALM():
         self.mode = sys.argv[8] #''
         self.metric = sys.argv[9]
         self.save_folder = sys.argv[10]
-        self.continuous_epochs = 20 # val accuracy should be consecutively below these many number of epochs
+        self.lam_learn = 1
+        if sys.argv[11] == 'False':
+            self.lam_learn = 0
+        
+        self.all = True
+        if sys.argv[12] =='l1':
+            self.all = False
+
+        self.continuous_epochs = 100 # val accuracy should be consecutively below these many number of epochs
         # if self.metric=='accuracy':
         #     from sklearn.metrics import accuracy_score as score
         #     print('inside accuracy')
@@ -184,14 +193,14 @@ class TrainALM():
         # if self.qg_available:
         #     self.a = torch.from_numpy(np.load(self.dset_directory+'/prec.npy')).double()
         # else:
-        prec_lfs=[]
-        for i in range(self.n_lfs):
-            correct = 0
-            for j in range(len(self.y_valid)):
-                if self.y_valid[j] == self.l_valid[j][i]:
-                    correct+=1
-            prec_lfs.append(correct/len(self.y_valid))
-        self.a = torch.tensor(prec_lfs).double()
+        # prec_lfs=[]
+        # for i in range(self.n_lfs):
+        #     correct = 0
+        #     for j in range(len(self.y_valid)):
+        #         if self.y_valid[j] == self.l_valid[j][i]:
+        #             correct+=1
+        #     prec_lfs.append(correct/len(self.y_valid))
+        # self.a = torch.tensor(prec_lfs).double()
 
 
         self.continuous_mask = torch.zeros(self.n_lfs).double()
@@ -303,14 +312,12 @@ class TrainALM():
         loader_ind = DataLoader(MyDataset(self.dataset), batch_size=self.batch_size, shuffle=True,pin_memory=True)
         # loading initial teacher_model 1 here
 
-
-        
         self.best_epoch = 0
         self.best_score = 0
         val_acc = 0
-        self.continuous_epochs = 100
+        
 
-        if self.lam_learn: 
+        if self.lam_learn:
             lelam = LearnMultiLambdaMeta(loader_ind, self.x_valid,self.y_valid, copy.deepcopy(lr_model), self.n_classes, len(self.y_train), \
                 supervised_criterion_nored, "cpu", 2,theta, pi_y, pi,self.k, self.continuous_mask,\
                     supervised_criterion, Temp)
@@ -323,6 +330,7 @@ class TrainALM():
 
             for batch_ndx, sample in enumerate(loader):
                 optimizer_lr.zero_grad()
+                optimizer_gm.zero_grad()
 
                 unsup = []
                 sup = []
@@ -332,47 +340,74 @@ class TrainALM():
                 # Case I - CE for theta model
                 if len(supervised_indices) > 0:
                     loss_1 = supervised_criterion_nored(lr_model(sample[0][supervised_indices]), sample[1][supervised_indices])
-
-                y_pred_unsupervised = np.argmax(probability(theta, pi_y, pi, sample[2][unsupervised_indices], \
-                    sample[3][unsupervised_indices], self.k, self.n_classes,self.continuous_mask).detach().numpy(), 1)
-                loss_3 = supervised_criterion_nored(lr_model(sample[0][unsupervised_indices]), torch.tensor(y_pred_unsupervised))
-
-                if len(supervised_indices) > 0:
-                    loss_4 = log_likelihood_loss_supervised(theta, pi_y, pi, sample[1][supervised_indices], \
-                        sample[2][supervised_indices], sample[3][supervised_indices], self.k, self.n_classes, \
-                            self.continuous_mask)
-
-                if len(supervised_indices) >0:
-                    supervised_indices = supervised_indices.tolist()
-                    probs_graphical = probability(theta, pi_y, pi, torch.cat([sample[2][unsupervised_indices], sample[2][supervised_indices]]),\
-                    torch.cat([sample[3][unsupervised_indices],sample[3][supervised_indices]]), self.k, self.n_classes, self.continuous_mask)
+                
+                if self.all:
+                    y_pred_unsupervised = np.argmax(probability(theta, pi_y, pi, sample[2][unsupervised_indices], \
+                        sample[3][unsupervised_indices], self.k, self.n_classes,self.continuous_mask).detach().numpy(), 1)
+                    loss_3 = supervised_criterion_nored(lr_model(sample[0][unsupervised_indices]), torch.tensor(y_pred_unsupervised))
                 else:
-                    probs_graphical = probability(theta, pi_y, pi,sample[2][unsupervised_indices],sample[3][unsupervised_indices], self.k, self.n_classes, self.continuous_mask)
+                    loss_3 = 0
 
-                probs_graphical = (probs_graphical.t() / probs_graphical.sum(1)).t()
-                probs_lr = nn.Softmax()(lr_model(sample[0]))
-                loss_6 = torch.sum(torch.nn.KLDivLoss(reduction='none')(probs_lr, probs_graphical),dim=1)
+                if self.all:
+                    if len(supervised_indices) > 0:
+                        loss_4 = log_likelihood_loss_supervised(theta, pi_y, pi, sample[1][supervised_indices], \
+                            sample[2][supervised_indices], sample[3][supervised_indices], self.k, self.n_classes, \
+                                self.continuous_mask)
+                else:
+                    loss_4 = 0
 
+                if self.all:
+                
+                    if len(supervised_indices) >0:
+                        supervised_indices = supervised_indices.tolist()
+                        probs_graphical = probability(theta, pi_y, pi, torch.cat([sample[2][unsupervised_indices], sample[2][supervised_indices]]),\
+                        torch.cat([sample[3][unsupervised_indices],sample[3][supervised_indices]]), self.k, self.n_classes, self.continuous_mask)
+                    else:
+                        probs_graphical = probability(theta, pi_y, pi,sample[2][unsupervised_indices],sample[3][unsupervised_indices], self.k, self.n_classes, self.continuous_mask)
+                
+                
+
+                    probs_graphical = (probs_graphical.t() / probs_graphical.sum(1)).t()
+                    probs_lr = nn.Softmax()(lr_model(sample[0]))
+                    loss_6 = -torch.sum(torch.nn.KLDivLoss(reduction='none')(probs_lr, probs_graphical),dim=1)
+                
+                else:
+                    loss_6 = 0
                 #print(loss_1.shape,loss_3.shape,loss_6.shape )
                 #print(len(sample[5][supervised_indices]),len(sample[5][unsupervised_indices]))
 
-                if len(supervised_indices) >0:
-                    loss_super = loss_4 + (sample[5][supervised_indices][:,0]*loss_1 + \
-                        sample[5][supervised_indices][:,2]*loss_6[supervised_indices]).mean() 
+                # print('loss 1 ', loss_1)
+                # print('loss 3 ', loss_3)
+                # print('loss 4 ', loss_4)
+                # print('loss 6', loss_6)
+
+                if self.all:
+                    if len(supervised_indices) >0:
+                        loss_super = loss_4 + (sample[5][supervised_indices][:,0]*loss_1 + sample[5][supervised_indices][:,2]*loss_6[supervised_indices]).mean()
+                    else:
+                        loss_super = 0.0 
                 else:
-                    loss_super = 0
-                loss_un =(sample[5][unsupervised_indices][:,1]*loss_3 + \
-                    sample[5][unsupervised_indices][:,2]*loss_6[unsupervised_indices]).mean() 
+                    if len(supervised_indices) >0:
+                        loss_super = (sample[5][supervised_indices][:,0]*loss_1).mean()
+                    else:
+                        loss_super = 0.0
+
+                if self.all:
+                    loss_un =(sample[5][unsupervised_indices][:,1]*loss_3 + sample[5][unsupervised_indices][:,2]*loss_6[unsupervised_indices]).mean() 
                 #print(loss_super,sample[5][unsupervised_indices][:,1]*loss_3,sample[5][unsupervised_indices][:,2]*loss_6[unsupervised_indices])
-                loss = loss_super+ loss_un 
-                
-                loss.backward()
-                optimizer_lr.step()
-                optimizer_gm.step()
-            # print('Epoch ', epoch, ' loss is ',  loss.item() )
+                else:
+                    loss_un = 0
+
+                loss = loss_super + loss_un 
+                # print('loss ', loss)
+                if loss != 0:
+                    loss.backward()
+                    optimizer_lr.step()
+                    optimizer_gm.step()
+            # print('Epoch ', epoch, ' loss is ',  loss)
 
             if self.lam_learn and epoch > 10:
-
+                # print('inside lam learn #408')
                 cached_state_dictT = copy.deepcopy(lr_model.state_dict())
                 clone_dict = copy.deepcopy(lr_model.state_dict())
                 lelam.update_model(clone_dict)
